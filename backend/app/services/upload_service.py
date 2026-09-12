@@ -4,6 +4,7 @@ import uuid
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
 
 from app.core.config import settings
 from app.db.models import Sample
@@ -75,8 +76,20 @@ async def process_upload(
         )
         
         db.add(new_sample)
-        await db.commit()
-        await db.refresh(new_sample)
+        try:
+            await db.commit()
+            await db.refresh(new_sample)
+        except IntegrityError:
+            await db.rollback()
+            # A concurrent upload succeeded, retrieve it
+            result = await db.execute(select(Sample).filter(Sample.sha256 == sha256))
+            existing_sample = result.scalars().first()
+            if existing_sample:
+                if os.path.exists(temp_filepath):
+                    os.remove(temp_filepath)
+                logger.info(f"Duplicate sample handled via concurrent commit: {sha256}")
+                return existing_sample
+            raise CiphRException("UPLOAD_FAILED", "Failed to resolve concurrent upload race condition.")
         
         logger.info(f"Successfully processed new sample: {sha256}")
         return new_sample

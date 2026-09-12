@@ -18,8 +18,10 @@ from app.schemas.campaign import (
 )
 from app.schemas.sample import SampleResponse
 from app.schemas.common import PaginatedResponse
+from app.core.utils import validate_uuid
+from app.core.auth import get_api_key
 
-router = APIRouter(prefix="/campaigns", tags=["Campaigns"])
+router = APIRouter(prefix="/campaigns", tags=["Campaigns"], dependencies=[Depends(get_api_key)])
 
 async def _enrich_campaign_metadata(campaign: Campaign, db: AsyncSession) -> dict:
     """Calculates first_seen, last_seen, and sample_count for a campaign."""
@@ -83,6 +85,7 @@ async def list_campaigns(
 
 @router.get("/{campaign_id}", response_model=CampaignDetailResponse)
 async def get_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(campaign_id, "Campaign")
     result = await db.execute(select(Campaign).filter(Campaign.id == campaign_id))
     campaign = result.scalars().first()
     if not campaign:
@@ -97,6 +100,7 @@ async def get_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{campaign_id}/samples", response_model=List[SampleResponse])
 async def get_campaign_samples(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(campaign_id, "Campaign")
     result = await db.execute(
         select(Campaign)
         .options(selectinload(Campaign.samples))
@@ -110,6 +114,7 @@ async def get_campaign_samples(campaign_id: str, db: AsyncSession = Depends(get_
 @router.get("/{campaign_id}/graph", response_model=CampaignGraph)
 async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db)):
     """Returns a graph representation including Campaign, Samples, and Certificate nodes for vis-network."""
+    validate_uuid(campaign_id, "Campaign")
     # 1. Verify Campaign exists
     result = await db.execute(select(Campaign).filter(Campaign.id == campaign_id))
     campaign = result.scalars().first()
@@ -130,7 +135,7 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
     camp_node = CampaignGraphNode(
         id=campaign_id, 
         type="campaign", 
-        label=campaign.name,
+        label=str(campaign.name) if campaign.name is not None else "Unknown Campaign",
         metadata={"risk_score": campaign.risk_score, "status": campaign.status}
     )
     nodes.append(camp_node)
@@ -144,7 +149,8 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
             source=link.sample_id,
             target=campaign_id,
             relationship=link.relationship,
-            confidence=link.confidence
+            confidence=link.confidence,
+            signals=link.signals
         ))
         
     # Fetch sample details and analyses for nodes and certificates
@@ -193,6 +199,7 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
 @router.get("/{campaign_id}/timeline", response_model=CampaignTimelineResponse)
 async def get_campaign_timeline(campaign_id: str, db: AsyncSession = Depends(get_db)):
     """Returns chronological timeline events derived from real persisted campaign and sample timestamps."""
+    validate_uuid(campaign_id, "Campaign")
     result = await db.execute(select(Campaign).filter(Campaign.id == campaign_id))
     campaign = result.scalars().first()
     if not campaign:

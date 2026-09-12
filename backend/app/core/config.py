@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     MAX_APK_SIZE_MB: int = 100
     MAX_APK_SIZE_BYTES: int = MAX_APK_SIZE_MB * 1024 * 1024
 
+    # EMBER2024 Model (Phase 6D)
+    EMBER_MODEL_PATH: str = "./scratch/ember2024_benchmark/EMBER2024_APK.model"
+    
+    # Evidence Fusion Shadow Mode (Phase 6F)
+    FUSION_SHADOW_ENABLED: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Table, Text, JSON
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Table, Text, JSON, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -13,7 +13,8 @@ sample_campaign_links = Table(
     Column('campaign_id', String, ForeignKey('campaigns.id', ondelete='CASCADE'), primary_key=True),
     Column('relationship', String),
     Column('confidence', Float),
-    Column('reason', Text)
+    Column('reason', Text),
+    Column('signals', JSON)
 )
 
 class Sample(Base):
@@ -26,8 +27,8 @@ class Sample(Base):
     submitted_by = Column(String)
     status = Column(String, default='QUEUED')  # QUEUED, ANALYZING, COMPLETED, FAILED
     storage_path = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     analysis = relationship("Analysis", back_populates="sample", uselist=False, cascade="all, delete-orphan")
     findings = relationship("Finding", back_populates="sample", cascade="all, delete-orphan")
@@ -58,6 +59,7 @@ class Analysis(Base):
     permissions = Column(JSON)
     certificate_details = Column(JSON)
     risk_factors = Column(JSON)
+    dex_data = Column(JSON)
 
     sample = relationship("Sample", back_populates="analysis")
 
@@ -95,8 +97,20 @@ class Campaign(Base):
     name = Column(String, nullable=False, unique=True)
     description = Column(Text)
     risk_score = Column(Integer)
+    severity = Column(String) # LOW, MEDIUM, HIGH, CRITICAL
     status = Column(String, default='ACTIVE')
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    intelligence_summary = Column(JSON)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     samples = relationship("Sample", secondary=sample_campaign_links, back_populates="campaigns")
+
+class APIKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    key_hash = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_used_at = Column(DateTime, nullable=True)
+

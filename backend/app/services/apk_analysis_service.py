@@ -577,15 +577,14 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
         version_code = a.get_androidversion_code()
         min_sdk = a.get_min_sdk_version()
         target_sdk = a.get_target_sdk_version()
+        # Components (bounded defensively)
+        activities = (a.get_activities() or [])[:500]
+        services = (a.get_services() or [])[:500]
+        receivers = (a.get_receivers() or [])[:500]
+        providers = (a.get_providers() or [])[:500]
 
-        # Components
-        activities = a.get_activities() or []
-        services = a.get_services() or []
-        receivers = a.get_receivers() or []
-        providers = a.get_providers() or []
-
-        # Permissions
-        raw_perms = a.get_permissions() or []
+        # Permissions (bounded defensively)
+        raw_perms = (a.get_permissions() or [])[:500]
         permissions = set(raw_perms)
 
         # Certificate Extraction & Inspection
@@ -594,11 +593,22 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
 
         # TLSH Fuzzy Hashing
         tlsh_hash = calculate_tlsh(file_path)
-
-        # Deterministic Risk Evaluation & Findings
+        # Deterministic Risk Evaluation & Findings (Authoritative Baseline)
         risk_score, risk_factors, findings_data = calculate_risk_evaluation(permissions, cert_details)
         risk_level = calculate_risk_level(risk_score)
 
+        # --- DEX / Smali Intelligence Phase ---
+        dex_results = {}
+        try:
+            from app.services.dex_analysis_service import analyze_dex
+            all_dex = a.get_all_dex()
+            if all_dex:
+                dex_results = analyze_dex(all_dex)
+                # DEX findings and risk factors remain scoped inside dex_data to preserve calibrated baseline
+                pass
+        except Exception as e:
+            logger.error(f"DEX analysis failed during static analysis: {e}")
+            dex_results = {"error": str(e)}
         return {
             "status": "COMPLETED",
             "package_name": package_name,
@@ -618,7 +628,8 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
             "providers": providers,
             "permissions": sorted(list(permissions)),
             "certificate_details": cert_details,
-            "risk_factors": risk_factors
+            "risk_factors": risk_factors,
+            "dex_data": dex_results
         }
 
     except Exception as e:

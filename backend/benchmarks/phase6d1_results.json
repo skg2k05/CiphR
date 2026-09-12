@@ -1,0 +1,661 @@
+{
+  "corpus": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\tests\\fixtures\\ApiDemos-debug.apk",
+      "label": "benign",
+      "provenance": "Android SDK sample application (com.example.android.apis)",
+      "is_real_apk": true,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 4809449,
+      "non_empty": true,
+      "sha256": "354b56605e8f201ce5fdd5b796524d8fabae726ee57de2d76dcf878c4d7826f1",
+      "valid_zip": true,
+      "duplicate_sha256": false
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\tests\\fixtures\\ApiDemos-debug2.apk",
+      "label": "benign",
+      "provenance": "Android SDK sample application variant",
+      "is_real_apk": true,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 4809462,
+      "non_empty": true,
+      "sha256": "4a571ee9f2ed22e2ca032fc6d75083ebd1cf87f3e4386547218d8f947fcc0f99",
+      "valid_zip": true,
+      "duplicate_sha256": false
+    },
+    {
+      "filename": "dummy.apk",
+      "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\tests\\fixtures\\dummy.apk",
+      "label": "synthetic",
+      "provenance": "Synthetic test fixture (177 bytes, minimal ZIP)",
+      "is_real_apk": false,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 177,
+      "non_empty": true,
+      "sha256": "c6b8f2e69c822ffe6d0303fa5f49b1bd115fbdc684c5759f578be1d30825d9dc",
+      "valid_zip": true,
+      "duplicate_sha256": false
+    },
+    {
+      "filename": "dummy2.apk",
+      "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\tests\\fixtures\\dummy2.apk",
+      "label": "synthetic",
+      "provenance": "Synthetic test fixture (6 bytes, not a valid APK)",
+      "is_real_apk": false,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 6,
+      "non_empty": true,
+      "sha256": "d6f175817f886ec6fbbc1515326465fa96c3bfd54a4ea06cfd6dbbd8340e0152",
+      "valid_zip": false,
+      "duplicate_sha256": false
+    }
+  ],
+  "ember_inference": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "label": "benign",
+      "provenance": "Android SDK sample application (com.example.android.apis)",
+      "is_real_apk": true,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 4809449,
+      "non_empty": true,
+      "sha256": "354b56605e8f201ce5fdd5b796524d8fabae726ee57de2d76dcf878c4d7826f1",
+      "valid_zip": true,
+      "duplicate_sha256": false,
+      "ember_score": 0.3983871671279465,
+      "inference_success": true,
+      "feature_dimension": 2568,
+      "error": null,
+      "total_time_s": 4.5973
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "label": "benign",
+      "provenance": "Android SDK sample application variant",
+      "is_real_apk": true,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 4809462,
+      "non_empty": true,
+      "sha256": "4a571ee9f2ed22e2ca032fc6d75083ebd1cf87f3e4386547218d8f947fcc0f99",
+      "valid_zip": true,
+      "duplicate_sha256": false,
+      "ember_score": 0.3983871671279465,
+      "inference_success": true,
+      "feature_dimension": 2568,
+      "error": null,
+      "total_time_s": 2.8563
+    },
+    {
+      "filename": "dummy.apk",
+      "label": "synthetic",
+      "provenance": "Synthetic test fixture (177 bytes, minimal ZIP)",
+      "is_real_apk": false,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 177,
+      "non_empty": true,
+      "sha256": "c6b8f2e69c822ffe6d0303fa5f49b1bd115fbdc684c5759f578be1d30825d9dc",
+      "valid_zip": true,
+      "duplicate_sha256": false,
+      "ember_score": 0.023504409767698818,
+      "inference_success": true,
+      "feature_dimension": 2568,
+      "error": null,
+      "total_time_s": 0.0791
+    },
+    {
+      "filename": "dummy2.apk",
+      "label": "synthetic",
+      "provenance": "Synthetic test fixture (6 bytes, not a valid APK)",
+      "is_real_apk": false,
+      "family": null,
+      "exists": true,
+      "is_regular_file": true,
+      "size_bytes": 6,
+      "non_empty": true,
+      "sha256": "d6f175817f886ec6fbbc1515326465fa96c3bfd54a4ea06cfd6dbbd8340e0152",
+      "valid_zip": false,
+      "duplicate_sha256": false,
+      "ember_score": 0.010086580958002864,
+      "inference_success": true,
+      "feature_dimension": 2568,
+      "error": null,
+      "total_time_s": 0.0799
+    }
+  ],
+  "feature_activation": {
+    "feature_groups": [
+      {
+        "name": "general",
+        "dim": 7,
+        "offset": 0
+      },
+      {
+        "name": "histogram",
+        "dim": 256,
+        "offset": 7
+      },
+      {
+        "name": "byteentropy",
+        "dim": 256,
+        "offset": 263
+      },
+      {
+        "name": "strings",
+        "dim": 177,
+        "offset": 519
+      },
+      {
+        "name": "header",
+        "dim": 74,
+        "offset": 696
+      },
+      {
+        "name": "section",
+        "dim": 224,
+        "offset": 770
+      },
+      {
+        "name": "imports",
+        "dim": 1282,
+        "offset": 994
+      },
+      {
+        "name": "exports",
+        "dim": 129,
+        "offset": 2276
+      },
+      {
+        "name": "datadirectories",
+        "dim": 34,
+        "offset": 2405
+      },
+      {
+        "name": "richheader",
+        "dim": 33,
+        "offset": 2439
+      },
+      {
+        "name": "authenticode",
+        "dim": 8,
+        "offset": 2472
+      },
+      {
+        "name": "pefilewarnings",
+        "dim": 88,
+        "offset": 2480
+      }
+    ],
+    "per_sample": {
+      "ApiDemos-debug.apk": {
+        "general": {
+          "non_zero": 6,
+          "total": 7,
+          "activation_pct": 85.7
+        },
+        "histogram": {
+          "non_zero": 256,
+          "total": 256,
+          "activation_pct": 100.0
+        },
+        "byteentropy": {
+          "non_zero": 256,
+          "total": 256,
+          "activation_pct": 100.0
+        },
+        "strings": {
+          "non_zero": 126,
+          "total": 177,
+          "activation_pct": 71.2
+        },
+        "header": {
+          "non_zero": 0,
+          "total": 74,
+          "activation_pct": 0.0
+        },
+        "section": {
+          "non_zero": 0,
+          "total": 224,
+          "activation_pct": 0.0
+        },
+        "imports": {
+          "non_zero": 0,
+          "total": 1282,
+          "activation_pct": 0.0
+        },
+        "exports": {
+          "non_zero": 0,
+          "total": 129,
+          "activation_pct": 0.0
+        },
+        "datadirectories": {
+          "non_zero": 0,
+          "total": 34,
+          "activation_pct": 0.0
+        },
+        "richheader": {
+          "non_zero": 0,
+          "total": 33,
+          "activation_pct": 0.0
+        },
+        "authenticode": {
+          "non_zero": 0,
+          "total": 8,
+          "activation_pct": 0.0
+        },
+        "pefilewarnings": {
+          "non_zero": 0,
+          "total": 88,
+          "activation_pct": 0.0
+        }
+      },
+      "ApiDemos-debug2.apk": {
+        "general": {
+          "non_zero": 6,
+          "total": 7,
+          "activation_pct": 85.7
+        },
+        "histogram": {
+          "non_zero": 256,
+          "total": 256,
+          "activation_pct": 100.0
+        },
+        "byteentropy": {
+          "non_zero": 256,
+          "total": 256,
+          "activation_pct": 100.0
+        },
+        "strings": {
+          "non_zero": 126,
+          "total": 177,
+          "activation_pct": 71.2
+        },
+        "header": {
+          "non_zero": 0,
+          "total": 74,
+          "activation_pct": 0.0
+        },
+        "section": {
+          "non_zero": 0,
+          "total": 224,
+          "activation_pct": 0.0
+        },
+        "imports": {
+          "non_zero": 0,
+          "total": 1282,
+          "activation_pct": 0.0
+        },
+        "exports": {
+          "non_zero": 0,
+          "total": 129,
+          "activation_pct": 0.0
+        },
+        "datadirectories": {
+          "non_zero": 0,
+          "total": 34,
+          "activation_pct": 0.0
+        },
+        "richheader": {
+          "non_zero": 0,
+          "total": 33,
+          "activation_pct": 0.0
+        },
+        "authenticode": {
+          "non_zero": 0,
+          "total": 8,
+          "activation_pct": 0.0
+        },
+        "pefilewarnings": {
+          "non_zero": 0,
+          "total": 88,
+          "activation_pct": 0.0
+        }
+      },
+      "dummy.apk": {
+        "general": {
+          "non_zero": 6,
+          "total": 7,
+          "activation_pct": 85.7
+        },
+        "histogram": {
+          "non_zero": 64,
+          "total": 256,
+          "activation_pct": 25.0
+        },
+        "byteentropy": {
+          "non_zero": 14,
+          "total": 256,
+          "activation_pct": 5.5
+        },
+        "strings": {
+          "non_zero": 32,
+          "total": 177,
+          "activation_pct": 18.1
+        },
+        "header": {
+          "non_zero": 0,
+          "total": 74,
+          "activation_pct": 0.0
+        },
+        "section": {
+          "non_zero": 0,
+          "total": 224,
+          "activation_pct": 0.0
+        },
+        "imports": {
+          "non_zero": 0,
+          "total": 1282,
+          "activation_pct": 0.0
+        },
+        "exports": {
+          "non_zero": 0,
+          "total": 129,
+          "activation_pct": 0.0
+        },
+        "datadirectories": {
+          "non_zero": 0,
+          "total": 34,
+          "activation_pct": 0.0
+        },
+        "richheader": {
+          "non_zero": 0,
+          "total": 33,
+          "activation_pct": 0.0
+        },
+        "authenticode": {
+          "non_zero": 0,
+          "total": 8,
+          "activation_pct": 0.0
+        },
+        "pefilewarnings": {
+          "non_zero": 0,
+          "total": 88,
+          "activation_pct": 0.0
+        }
+      },
+      "dummy2.apk": {
+        "general": {
+          "non_zero": 6,
+          "total": 7,
+          "activation_pct": 85.7
+        },
+        "histogram": {
+          "non_zero": 5,
+          "total": 256,
+          "activation_pct": 2.0
+        },
+        "byteentropy": {
+          "non_zero": 3,
+          "total": 256,
+          "activation_pct": 1.2
+        },
+        "strings": {
+          "non_zero": 9,
+          "total": 177,
+          "activation_pct": 5.1
+        },
+        "header": {
+          "non_zero": 0,
+          "total": 74,
+          "activation_pct": 0.0
+        },
+        "section": {
+          "non_zero": 0,
+          "total": 224,
+          "activation_pct": 0.0
+        },
+        "imports": {
+          "non_zero": 0,
+          "total": 1282,
+          "activation_pct": 0.0
+        },
+        "exports": {
+          "non_zero": 0,
+          "total": 129,
+          "activation_pct": 0.0
+        },
+        "datadirectories": {
+          "non_zero": 0,
+          "total": 34,
+          "activation_pct": 0.0
+        },
+        "richheader": {
+          "non_zero": 0,
+          "total": 33,
+          "activation_pct": 0.0
+        },
+        "authenticode": {
+          "non_zero": 0,
+          "total": 8,
+          "activation_pct": 0.0
+        },
+        "pefilewarnings": {
+          "non_zero": 0,
+          "total": 88,
+          "activation_pct": 0.0
+        }
+      }
+    }
+  },
+  "ciphr_comparison": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "label": "benign",
+      "ember_score": 0.3983871671279465,
+      "ciphr_risk_score": 95,
+      "ciphr_dex_risk": 10,
+      "ciphr_total_risk": 100,
+      "ciphr_permission_count": 12,
+      "ciphr_risky_permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.RECEIVE_SMS",
+        "android.permission.CAMERA",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.SEND_SMS",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "ciphr_tlsh": "ERROR_TLSH_UNAVAILABLE",
+      "ciphr_activities": 332,
+      "ciphr_services": 11,
+      "ciphr_receivers": 7,
+      "package_name": "io.appium.android.apis"
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "label": "benign",
+      "ember_score": 0.3983871671279465,
+      "ciphr_risk_score": 95,
+      "ciphr_dex_risk": 10,
+      "ciphr_total_risk": 100,
+      "ciphr_permission_count": 12,
+      "ciphr_risky_permissions": [
+        "android.permission.RECEIVE_SMS",
+        "android.permission.READ_CONTACTS",
+        "android.permission.CAMERA",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.SEND_SMS",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "ciphr_tlsh": "ERROR_TLSH_UNAVAILABLE",
+      "ciphr_activities": 332,
+      "ciphr_services": 11,
+      "ciphr_receivers": 7,
+      "package_name": "io.appium.android.apis"
+    }
+  ],
+  "determinism": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "label": "benign",
+      "runs": [
+        {
+          "run": 1,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 2,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 3,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        }
+      ],
+      "deterministic": true
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "label": "benign",
+      "runs": [
+        {
+          "run": 1,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 2,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 3,
+          "score": 0.3983871671279465,
+          "feature_dimension": 2568,
+          "inference_success": true
+        }
+      ],
+      "deterministic": true
+    },
+    {
+      "filename": "dummy.apk",
+      "label": "synthetic",
+      "runs": [
+        {
+          "run": 1,
+          "score": 0.023504409767698818,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 2,
+          "score": 0.023504409767698818,
+          "feature_dimension": 2568,
+          "inference_success": true
+        },
+        {
+          "run": 3,
+          "score": 0.023504409767698818,
+          "feature_dimension": 2568,
+          "inference_success": true
+        }
+      ],
+      "deterministic": true
+    }
+  ],
+  "performance": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "size_bytes": 4809449,
+      "model_load_s": 0.0165,
+      "feature_extraction_s": 2.9195,
+      "inference_s": 0.0005,
+      "total_s": 2.9365
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "size_bytes": 4809462,
+      "model_load_s": 0.0176,
+      "feature_extraction_s": 2.8696,
+      "inference_s": 0.0005,
+      "total_s": 2.8877
+    },
+    {
+      "filename": "dummy.apk",
+      "size_bytes": 177,
+      "model_load_s": 0.019,
+      "feature_extraction_s": 0.1318,
+      "inference_s": 0.0004,
+      "total_s": 0.1513
+    },
+    {
+      "filename": "dummy2.apk",
+      "size_bytes": 6,
+      "model_load_s": 0.0199,
+      "feature_extraction_s": 0.1267,
+      "inference_s": 0.0005,
+      "total_s": 0.1471
+    }
+  ],
+  "score_distribution": {
+    "benign": {
+      "count": 2,
+      "min": 0.398387,
+      "max": 0.398387,
+      "mean": 0.398387,
+      "median": 0.398387,
+      "stdev": 0.0,
+      "scores": [
+        0.398387,
+        0.398387
+      ]
+    },
+    "malicious": {
+      "count": 0,
+      "note": "No samples in this category"
+    },
+    "synthetic": {
+      "count": 2,
+      "min": 0.010087,
+      "max": 0.023504,
+      "mean": 0.016795,
+      "median": 0.016795,
+      "stdev": 0.009488,
+      "scores": [
+        0.010087,
+        0.023504
+      ]
+    },
+    "classification_metrics_possible": false
+  },
+  "ranking": {
+    "ranked_samples": [
+      {
+        "filename": "ApiDemos-debug.apk",
+        "label": "benign",
+        "score": 0.3983871671279465
+      },
+      {
+        "filename": "ApiDemos-debug2.apk",
+        "label": "benign",
+        "score": 0.3983871671279465
+      }
+    ],
+    "highest_benign_score": 0.3983871671279465,
+    "lowest_benign_score": 0.3983871671279465,
+    "note": "Cannot compute overlap -- missing benign or malicious samples"
+  }
+}

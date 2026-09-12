@@ -14,8 +14,8 @@ async def db_session():
 async def test_p0_sample_and_campaign_intelligence(async_client, db_session):
     # Setup two correlated samples with same certificate
     cert_hash = "test_cert_fingerprint_1234567890abcdef"
-    s1 = Sample(id="p0_s1", filename="sample1.apk", sha256="hash111", created_at=datetime(2026, 9, 12, 10, 0, 0))
-    s2 = Sample(id="p0_s2", filename="sample2.apk", sha256="hash222", created_at=datetime(2026, 9, 12, 10, 5, 0))
+    s1 = Sample(id="00000000-0000-0000-0000-000000000001", filename="sample1.apk", sha256="hash111", created_at=datetime(2026, 9, 12, 10, 0, 0))
+    s2 = Sample(id="00000000-0000-0000-0000-000000000002", filename="sample2.apk", sha256="hash222", created_at=datetime(2026, 9, 12, 10, 5, 0))
     
     a1 = Analysis(
         sample=s1,
@@ -50,13 +50,13 @@ async def test_p0_sample_and_campaign_intelligence(async_client, db_session):
     await db_session.commit()
     
     # 1. Correlate s2 (s1 was existing)
-    await run_correlation("p0_s2", db_session)
+    await run_correlation("00000000-0000-0000-0000-000000000002", db_session)
     
     # 2. Test Idempotency - running correlation again must not duplicate links
-    await run_correlation("p0_s2", db_session)
+    await run_correlation("00000000-0000-0000-0000-000000000002", db_session)
     
     # 3. Test GET /samples/{sample_id}
-    res_s1 = await async_client.get("/api/v1/samples/p0_s1")
+    res_s1 = await async_client.get("/api/v1/samples/00000000-0000-0000-0000-000000000001")
     assert res_s1.status_code == 200
     data_s1 = res_s1.json()
     assert data_s1["analysis"]["permissions"] == ["android.permission.INTERNET", "android.permission.SEND_SMS"]
@@ -64,15 +64,15 @@ async def test_p0_sample_and_campaign_intelligence(async_client, db_session):
     assert data_s1["analysis"]["certificate_details"]["is_debug"] is True
     assert len(data_s1["campaigns"]) == 1
     assert data_s1["related_sample_count"] == 1
-    assert data_s1["related_samples"][0]["sample_id"] == "p0_s2"
+    assert data_s1["related_samples"][0]["sample_id"] == "00000000-0000-0000-0000-000000000002"
     assert data_s1["related_samples"][0]["relationship"] == "same_certificate"
     
     # 4. Test GET /samples/{sample_id}/related
-    res_rel = await async_client.get("/api/v1/samples/p0_s1/related")
+    res_rel = await async_client.get("/api/v1/samples/00000000-0000-0000-0000-000000000001/related")
     assert res_rel.status_code == 200
     data_rel = res_rel.json()
     assert data_rel["total"] == 1
-    assert data_rel["items"][0]["sample_id"] == "p0_s2"
+    assert data_rel["items"][0]["sample_id"] == "00000000-0000-0000-0000-000000000002"
     assert data_rel["items"][0]["filename"] == "sample2.apk"
     
     # Get campaign ID

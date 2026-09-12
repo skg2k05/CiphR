@@ -1,0 +1,19 @@
+{
+  "dataset_name": "EMBER2024",
+  "dataset_version": "v1",
+  "source": "HuggingFace: joyce8/EMBER2024",
+  "download_method": "huggingface_hub.hf_hub_download(repo_id='joyce8/EMBER2024', filename='APK_test.zip', repo_type='dataset')",
+  "feature_version": "thrember-PEFeatureExtractor-v3",
+  "feature_dimension": 2568,
+  "model_file": "EMBER2024_APK.model",
+  "license": "Apache-2.0",
+  "subset_used": "APK_test",
+  "data_type": "precomputed_feature_vectors_jsonl",
+  "raw_apk_binaries": false,
+  "notes": "This dataset contains precomputed raw feature JSONL, NOT raw APK binaries. Model-level validation only.",
+  "total_labeled_samples": 96000,
+  "label_distribution": {
+    "0": 48000,
+    "1": 48000
+  }
+}

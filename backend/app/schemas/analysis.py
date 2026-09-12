@@ -21,6 +21,7 @@ class AnalysisBase(BaseModel):
     providers: Optional[list] = None
     permissions: Optional[list] = None
     certificate_details: Optional[dict] = None
+    dex_data: Optional[dict] = None
     threat_narrative: Optional[str] = None
 
 class AnalysisCreate(AnalysisBase):
