@@ -14,7 +14,8 @@ from app.schemas.threat_decision import (
     CampaignInfo,
     EvidenceItemResponse,
     RecommendedAction,
-    ProvenanceInfo
+    ProvenanceInfo,
+    AnalysisCoverage
 )
 
 def _create_base_decision() -> ThreatDecisionResponse:
@@ -28,7 +29,8 @@ def _create_base_decision() -> ThreatDecisionResponse:
         campaign=CampaignInfo(status=CampaignStatus.UNKNOWN, related_samples_count=0),
         evidence=[],
         recommended_action=RecommendedAction.UNKNOWN,
-        provenance=ProvenanceInfo(source_type="upload", sha256="123")
+        provenance=ProvenanceInfo(source_type="upload", sha256="123"),
+        analysis_coverage=AnalysisCoverage.MANIFEST_ONLY
     )
 
 def test_malicious_report():
@@ -43,10 +45,12 @@ def test_malicious_report():
     decision.threat_types = [ThreatType.CREDENTIAL_THEFT, ThreatType.OVERLAY]
     decision.recommended_action = RecommendedAction.QUARANTINE
     decision.campaign = CampaignInfo(status=CampaignStatus.MATCHED, identifier="campaign_123", related_samples_count=5)
+    decision.analysis_coverage = AnalysisCoverage.CORRELATED
     
     report = build_analyst_report(decision)
     
     assert report.verdict == ThreatClassification.MALICIOUS
+    assert report.analysis_coverage == AnalysisCoverage.CORRELATED
     assert "Malicious APK with high confidence" in report.deterministic_summary
     assert "variant of previously observed samples" in report.deterministic_summary
     assert "credential theft, overlay behavior" in report.deterministic_summary

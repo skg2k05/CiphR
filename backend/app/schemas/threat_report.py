@@ -11,7 +11,8 @@ from app.schemas.threat_decision import (
     RecommendedAction,
     ProvenanceInfo,
     NoveltySignal,
-    CampaignInfo
+    CampaignInfo,
+    AnalysisCoverage
 )
 
 class HistoricalContextItem(BaseModel):
@@ -38,6 +39,8 @@ class AnalystThreatReportResponse(BaseModel):
     
     recommended_action: RecommendedAction
     provenance: ProvenanceInfo
+    
+    analysis_coverage: AnalysisCoverage
     
     deterministic_summary: str
 

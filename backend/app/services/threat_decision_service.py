@@ -17,9 +17,30 @@ from app.schemas.threat_decision import (
     CampaignInfo,
     EvidenceItemResponse,
     RecommendedAction,
-    ProvenanceInfo
+    ProvenanceInfo,
+    AnalysisCoverage
 )
 import json
+
+def _determine_analysis_coverage(analysis: Optional[Analysis], has_correlation: bool) -> AnalysisCoverage:
+    coverage = AnalysisCoverage.MANIFEST_ONLY
+    
+    if analysis and isinstance(analysis.dex_data, dict):
+        dex_data = analysis.dex_data
+        if "error" not in dex_data:
+            dex_files_analyzed = dex_data.get("dex_files_analyzed", 0)
+            if dex_files_analyzed > 0:
+                coverage = AnalysisCoverage.STATIC_DEX
+                
+                # Check for meaningful indicators
+                keys_to_check = ["suspicious_apis", "hardcoded_ips", "urls", "domains", "encoded_strings", "decoded_indicators"]
+                if any(isinstance(dex_data.get(k), list) and len(dex_data.get(k)) > 0 for k in keys_to_check):
+                    coverage = AnalysisCoverage.STATIC_DEX_ENRICHED
+                    
+    if has_correlation:
+        coverage = AnalysisCoverage.CORRELATED
+        
+    return coverage
 
 async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecisionResponse:
     analysis: Optional[Analysis] = sample.analysis
@@ -274,6 +295,11 @@ async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecis
         analysis_timestamp=analysis.started_at if analysis else None
     )
 
+    # --- Analysis Coverage ---
+    has_link_signals = any(bool(getattr(link, "signals", []) or []) for link in links)
+    has_correlation = (camp_status == CampaignStatus.MATCHED) or has_link_signals
+    analysis_coverage = _determine_analysis_coverage(analysis, has_correlation)
+
     return ThreatDecisionResponse(
         classification=classification,
         risk_score=risk_score,
@@ -292,5 +318,6 @@ async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecis
         ),
         evidence=evidence_items,
         recommended_action=recommended_action,
-        provenance=provenance
+        provenance=provenance,
+        analysis_coverage=analysis_coverage
     )

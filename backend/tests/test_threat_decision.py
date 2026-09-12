@@ -12,9 +12,10 @@ from app.schemas.threat_decision import (
     NoveltyStatus,
     ImpactLevel,
     AccessScope,
-    CampaignStatus,
     ThreatType,
-    RecommendedAction
+    CampaignStatus,
+    RecommendedAction,
+    AnalysisCoverage
 )
 
 def _create_base_sample():
@@ -212,3 +213,118 @@ async def test_provenance_mapping():
     assert decision.provenance.source_url == "https://example.com/malware.apk"
     assert decision.provenance.sha256 == sample.sha256
     assert decision.provenance.analysis_timestamp == sample.analysis.started_at
+
+@pytest.mark.asyncio
+async def test_coverage_no_analysis():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.MANIFEST_ONLY
+
+@pytest.mark.asyncio
+async def test_coverage_missing_dex_data():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(status="COMPLETED", dex_data=None)
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.MANIFEST_ONLY
+
+@pytest.mark.asyncio
+async def test_coverage_dex_analyzed_zero_indicators():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 1,
+            "suspicious_apis": [],
+            "urls": []
+        }
+    )
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.STATIC_DEX
+
+@pytest.mark.asyncio
+async def test_coverage_dex_suspicious_api():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 1,
+            "suspicious_apis": [{"api": "Ljava/lang/Runtime;->exec"}]
+        }
+    )
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.STATIC_DEX_ENRICHED
+
+@pytest.mark.asyncio
+async def test_coverage_dex_url():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 2,
+            "urls": [{"indicator": "http://evil.com"}]
+        }
+    )
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.STATIC_DEX_ENRICHED
+
+@pytest.mark.asyncio
+async def test_coverage_dex_decoded_indicator():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 1,
+            "decoded_indicators": [{"type": "base64", "value": "secret"}]
+        }
+    )
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.STATIC_DEX_ENRICHED
+
+@pytest.mark.asyncio
+async def test_coverage_dex_error():
+    sample = _create_base_sample()
+    db = _create_mock_db()
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={"error": "Failed to parse DEX"}
+    )
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.MANIFEST_ONLY
+
+@pytest.mark.asyncio
+async def test_coverage_correlated():
+    sample = _create_base_sample()
+    # Campaign matching should override
+    db = _create_mock_db(links_data=[], related_ids=["sample2"])
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 1,
+            "urls": [{"indicator": "http://evil.com"}]
+        }
+    )
+    sample.campaigns = [Campaign(id=str(uuid.uuid4()), name="TestCampaign")]
+    decision = await build_threat_decision(sample, db)
+    assert decision.analysis_coverage == AnalysisCoverage.CORRELATED
+
+@pytest.mark.asyncio
+async def test_coverage_empty_link_not_correlated():
+    sample = _create_base_sample()
+    # Provide a link with empty signals
+    db = _create_mock_db(links_data=[{"signals": []}], related_ids=["sample2"])
+    sample.analysis = Analysis(
+        status="COMPLETED", 
+        dex_data={
+            "dex_files_analyzed": 1,
+            "suspicious_apis": []
+        }
+    )
+    decision = await build_threat_decision(sample, db)
+    # Coverage should remain STATIC_DEX because the link has no signals
+    assert decision.analysis_coverage == AnalysisCoverage.STATIC_DEX

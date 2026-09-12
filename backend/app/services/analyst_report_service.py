@@ -101,5 +101,6 @@ def build_analyst_report(decision: ThreatDecisionResponse) -> AnalystThreatRepor
         historical_context=historical_context,
         recommended_action=decision.recommended_action,
         provenance=decision.provenance,
+        analysis_coverage=decision.analysis_coverage,
         deterministic_summary=deterministic_summary
     )

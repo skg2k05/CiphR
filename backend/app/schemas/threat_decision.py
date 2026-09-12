@@ -59,6 +59,12 @@ class RecommendedAction(str, Enum):
     BLOCK = "BLOCK"
     UNKNOWN = "UNKNOWN"
 
+class AnalysisCoverage(str, Enum):
+    MANIFEST_ONLY = "MANIFEST_ONLY"
+    STATIC_DEX = "STATIC_DEX"
+    STATIC_DEX_ENRICHED = "STATIC_DEX_ENRICHED"
+    CORRELATED = "CORRELATED"
+
 class EvidenceItemResponse(BaseModel):
     source: str
     finding: str
@@ -108,5 +114,6 @@ class ThreatDecisionResponse(BaseModel):
     evidence: List[EvidenceItemResponse]
     recommended_action: RecommendedAction
     provenance: ProvenanceInfo
+    analysis_coverage: AnalysisCoverage
 
     model_config = ConfigDict(from_attributes=True)
