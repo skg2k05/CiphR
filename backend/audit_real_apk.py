@@ -3,12 +3,15 @@ import os
 import json
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.db.database import AsyncSessionLocal
+from app.db.database import AsyncSessionLocal, engine, Base
 from sqlalchemy import text
 
 async def run_real_audit():
     print("--- STARTING REAL E2E AUDIT ---")
     
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     async with AsyncSessionLocal() as db:
         await db.execute(text("DELETE FROM sample_campaign_links"))
         await db.execute(text("DELETE FROM findings"))
