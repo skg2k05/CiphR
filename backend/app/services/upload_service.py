@@ -13,31 +13,16 @@ from app.services.validation_service import validate_apk_file
 from app.core.exceptions import CiphRException
 from app.core.logging import logger
 
-async def process_upload(
-    file: UploadFile,
+async def _process_local_file(
+    temp_filepath: str,
+    filename: str,
+    size: int,
     source: str,
     submitted_by: str,
     db: AsyncSession
 ) -> Sample:
-    """Handles the saving, hashing, and initial db record for an uploaded APK."""
-    
-    filename = file.filename or "unknown.apk"
-    temp_id = str(uuid.uuid4())
-    temp_filename = f"{temp_id}_{filename}"
-    temp_filepath = os.path.join(settings.UPLOAD_DIR, temp_filename)
-    
-    # Save file efficiently
-    size = 0
+    """Internal shared logic for validating, hashing, and storing a local APK file."""
     try:
-        async with aiofiles.open(temp_filepath, 'wb') as out_file:
-            while chunk := await file.read(8192):
-                size += len(chunk)
-                if size > settings.MAX_APK_SIZE_BYTES:
-                    # Early termination
-                    os.remove(temp_filepath)
-                    raise CiphRException("FILE_TOO_LARGE", f"File exceeds maximum size of {settings.MAX_APK_SIZE_MB}MB.")
-                await out_file.write(chunk)
-                
         # Validate
         validate_apk_file(filename, temp_filepath, size)
         
@@ -99,7 +84,42 @@ async def process_upload(
             os.remove(temp_filepath)
         raise
     except Exception as e:
-        logger.error(f"Error during upload processing: {e}")
+        logger.error(f"Error during file processing: {e}")
         if os.path.exists(temp_filepath):
             os.remove(temp_filepath)
-        raise CiphRException("UPLOAD_FAILED", "An unexpected error occurred during upload processing.", status_code=500)
+        raise CiphRException("UPLOAD_FAILED", "An unexpected error occurred during file processing.", status_code=500)
+
+async def process_upload(
+    file: UploadFile,
+    source: str,
+    submitted_by: str,
+    db: AsyncSession
+) -> Sample:
+    """Handles the saving, hashing, and initial db record for an uploaded APK."""
+    filename = file.filename or "unknown.apk"
+    temp_id = str(uuid.uuid4())
+    temp_filename = f"{temp_id}_{filename}"
+    temp_filepath = os.path.join(settings.UPLOAD_DIR, temp_filename)
+    
+    # Save file efficiently
+    size = 0
+    try:
+        async with aiofiles.open(temp_filepath, 'wb') as out_file:
+            while chunk := await file.read(8192):
+                size += len(chunk)
+                if size > settings.MAX_APK_SIZE_BYTES:
+                    # Early termination
+                    os.remove(temp_filepath)
+                    raise CiphRException("FILE_TOO_LARGE", f"File exceeds maximum size of {settings.MAX_APK_SIZE_MB}MB.")
+                await out_file.write(chunk)
+                
+        return await _process_local_file(temp_filepath, filename, size, source, submitted_by, db)
+    except CiphRException:
+        if os.path.exists(temp_filepath):
+            os.remove(temp_filepath)
+        raise
+    except Exception as e:
+        logger.error(f"Error during upload saving: {e}")
+        if os.path.exists(temp_filepath):
+            os.remove(temp_filepath)
+        raise CiphRException("UPLOAD_FAILED", "An unexpected error occurred during upload saving.", status_code=500)

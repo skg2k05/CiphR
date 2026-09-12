@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     MAX_APK_SIZE_MB: int = 100
     MAX_APK_SIZE_BYTES: int = MAX_APK_SIZE_MB * 1024 * 1024
+    
+    # URL Ingestion Settings
+    URL_FETCH_TIMEOUT: int = 15
+    URL_MAX_REDIRECTS: int = 3
 
     # EMBER2024 Model (Phase 6D)
     EMBER_MODEL_PATH: str = "./scratch/ember2024_benchmark/EMBER2024_APK.model"

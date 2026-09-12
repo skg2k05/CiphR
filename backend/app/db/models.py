@@ -34,6 +34,18 @@ class Sample(Base):
     findings = relationship("Finding", back_populates="sample", cascade="all, delete-orphan")
     campaigns = relationship("Campaign", secondary=sample_campaign_links, back_populates="samples")
 
+    @property
+    def source_type(self) -> str:
+        if self.source and self.source.startswith("url|"):
+            return "url"
+        return "upload"
+
+    @property
+    def source_url(self) -> str | None:
+        if self.source and self.source.startswith("url|"):
+            return self.source[4:]
+        return None
+
 class Analysis(Base):
     __tablename__ = 'analyses'
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))

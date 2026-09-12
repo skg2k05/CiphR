@@ -6,11 +6,12 @@ from typing import List, Optional
 
 from app.db.database import get_db
 from app.db.models import Sample, Analysis, Finding
-from app.schemas.sample import SampleResponse, SampleDetailResponse
+from app.schemas.sample import SampleResponse, SampleDetailResponse, UrlAnalysisRequest
 from app.schemas.analysis import AnalysisResponse
 from app.schemas.finding import FindingResponse
 from app.schemas.common import PaginatedResponse
 from app.services.upload_service import process_upload
+from app.services.url_ingestion_service import process_url
 from app.services.pipeline_service import process_sample_pipeline
 from app.core.utils import validate_uuid
 from app.core.auth import get_api_key
@@ -26,7 +27,22 @@ async def upload_sample(
     db: AsyncSession = Depends(get_db)
 ):
     """Uploads an APK for analysis and queues the pipeline."""
-    sample = await process_upload(file, source or "", submitted_by or "", db)
+    sample = await process_upload(file, source or "upload", submitted_by or "", db)
+    
+    if str(sample.status) == 'QUEUED':
+        background_tasks.add_task(process_sample_pipeline, str(sample.id))
+        
+    return sample
+
+@router.post("/url", response_model=SampleResponse)
+async def analyze_url(
+    request: UrlAnalysisRequest,
+    background_tasks: BackgroundTasks,
+    submitted_by: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Fetches an APK from a remote URL for analysis and queues the pipeline."""
+    sample = await process_url(request.url, submitted_by or "", db)
     
     if str(sample.status) == 'QUEUED':
         background_tasks.add_task(process_sample_pipeline, str(sample.id))
@@ -58,18 +74,24 @@ async def list_samples(
         size=limit
     )
 
+from app.services.threat_decision_service import build_threat_decision
+
 @router.get("/{sample_id}", response_model=SampleDetailResponse)
 async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
     validate_uuid(sample_id, "Sample")
     result = await db.execute(
         select(Sample)
-        .options(selectinload(Sample.analysis), selectinload(Sample.findings))
+        .options(selectinload(Sample.analysis), selectinload(Sample.findings), selectinload(Sample.campaigns))
         .filter(Sample.id == sample_id)
     )
     sample = result.scalars().first()
     if not sample:
         raise HTTPException(status_code=404, detail="Sample not found")
-    return sample
+        
+    # Build threat decision and attach dynamically
+    sample_response = SampleDetailResponse.model_validate(sample)
+    sample_response.threat_decision = await build_threat_decision(sample, db)
+    return sample_response
 
 @router.get("/{sample_id}/status")
 async def get_sample_status(sample_id: str, db: AsyncSession = Depends(get_db)):
