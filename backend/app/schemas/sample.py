@@ -20,6 +20,8 @@ class SampleResponse(SampleBase):
     status: str
     created_at: datetime
     updated_at: datetime
+    risk_score: Optional[int] = None
+    risk_level: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 

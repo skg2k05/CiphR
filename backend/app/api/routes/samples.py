@@ -40,7 +40,7 @@ async def list_samples(
     status: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Sample).order_by(Sample.created_at.desc())
+    query = select(Sample).options(selectinload(Sample.analysis)).order_by(Sample.created_at.desc())
     if status:
         query = query.filter(Sample.status == status)
         
@@ -50,9 +50,16 @@ async def list_samples(
     # Total count (simplistic for MVP)
     total_result = await db.execute(select(Sample))
     total = len(total_result.scalars().all())
+
+    # Attach flat risk fields from analysis so SampleResponse can include them
+    items = []
+    for s in samples:
+        s.risk_score = s.analysis.risk_score if s.analysis else None
+        s.risk_level = s.analysis.risk_level if s.analysis else None
+        items.append(s)
     
     return PaginatedResponse(
-        items=list(samples),
+        items=items,
         total=total,
         page=(skip // limit) + 1,
         size=limit
