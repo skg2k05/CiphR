@@ -49,9 +49,11 @@ async def run_success_audit():
                 res1 = await client.post("/api/v1/samples/upload", files={"file": ("dummy1.apk", f, "application/vnd.android.package-archive")})
             sample1_id = res1.json()["id"]
             
-            # Create a second dummy file so it has a different hash
-            with open("tests/fixtures/dummy2.apk", "wb") as f:
-                f.write(b"dummy2")
+            # Create a second dummy file so it has a different hash but remains a valid zip
+            with open("tests/fixtures/dummy.apk", "rb") as f_in:
+                dummy_data = f_in.read()
+            with open("tests/fixtures/dummy2.apk", "wb") as f_out:
+                f_out.write(dummy_data + b"junk")
             with open("tests/fixtures/dummy2.apk", "rb") as f:
                 res2 = await client.post("/api/v1/samples/upload", files={"file": ("dummy2.apk", f, "application/vnd.android.package-archive")})
             sample2_id = res2.json()["id"]
