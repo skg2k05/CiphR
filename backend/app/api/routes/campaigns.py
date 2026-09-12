@@ -26,7 +26,7 @@ async def list_campaigns(
     total = len(total_result.scalars().all())
     
     return PaginatedResponse(
-        items=campaigns,
+        items=list(campaigns),
         total=total,
         page=(skip // limit) + 1,
         size=limit
@@ -70,8 +70,7 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
     nodes = []
     edges = []
     
-    # Add Campaign Node
-    nodes.append(CampaignGraphNode(id=campaign_id, type="campaign", label=campaign.name))
+    nodes.append(CampaignGraphNode(id=campaign_id, type="campaign", label=str(campaign.name) if campaign.name is not None else "Unknown Campaign"))
     
     sample_ids = []
     for link in links:
@@ -81,7 +80,8 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
             source=sample_id,
             target=campaign_id,
             relationship=link.relationship,
-            confidence=link.confidence
+            confidence=link.confidence,
+            signals=link.signals
         ))
         
     # Fetch sample details for nodes
@@ -89,6 +89,7 @@ async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db
         samples_result = await db.execute(select(Sample).filter(Sample.id.in_(sample_ids)))
         samples = samples_result.scalars().all()
         for s in samples:
-            nodes.append(CampaignGraphNode(id=s.id, type="sample", label=s.filename or s.sha256[:8]))
+            label = str(s.filename) if s.filename is not None else str(s.sha256)[:8]
+            nodes.append(CampaignGraphNode(id=str(s.id), type="sample", label=label))
 
     return CampaignGraph(nodes=nodes, edges=edges)

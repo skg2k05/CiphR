@@ -23,8 +23,8 @@ def create_app() -> FastAPI:
     )
 
     # Add exception handlers
-    app.add_exception_handler(CiphRException, ciphr_exception_handler)
-    app.add_exception_handler(Exception, global_exception_handler)
+    app.add_exception_handler(CiphRException, ciphr_exception_handler)  # type: ignore
+    app.add_exception_handler(Exception, global_exception_handler)  # type: ignore
 
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

@@ -17,6 +17,7 @@ class AnalysisBase(BaseModel):
     activities: Optional[list] = None
     services: Optional[list] = None
     receivers: Optional[list] = None
+    dex_data: Optional[dict] = None
     threat_narrative: Optional[str] = None
 
 class AnalysisCreate(AnalysisBase):

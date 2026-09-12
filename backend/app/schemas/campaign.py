@@ -6,7 +6,9 @@ class CampaignBase(BaseModel):
     name: str
     description: Optional[str] = None
     risk_score: Optional[int] = None
+    severity: Optional[str] = None
     status: str = 'ACTIVE'
+    intelligence_summary: Optional[dict] = None
 
 class CampaignCreate(CampaignBase):
     pass
@@ -28,6 +30,7 @@ class CampaignGraphEdge(BaseModel):
     target: str
     relationship: str
     confidence: float
+    signals: Optional[list] = None
 
 class CampaignGraph(BaseModel):
     nodes: List[CampaignGraphNode]

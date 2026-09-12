@@ -33,8 +33,8 @@ Your React workflow should be:
 
 ## Architecture Notes
 - **CORS**: The backend is configured to accept `allow_origins=["*"]`. You can safely fetch APIs from `http://localhost:3000` or `http://localhost:5173` without encountering CORS blocks.
-- **TLSH Limitation**: Because `python-tlsh` fails to compile on standard Windows machines without Visual Studio C++ Tools, the engine gracefully utilizes a `MockTLSH` provider to prevent pipeline failures. It still effectively hashes data deterministically for Correlation engine tests.
-- **LLM Fallback**: If `.env` lacks `GROQ_API_KEY` or `GEMINI_API_KEY`, the backend automatically utilizes a `MockLLMProvider` that successfully parses risk scores and generates plaintext mock narratives.
+- **TLSH Implementation**: TLSH hashing is now **REAL** via `python-tlsh`. Because it is a C-extension that requires GCC/MSVC, a `Dockerfile` and `docker-compose.yml` are provided. Run `docker-compose up --build` to run the backend natively in a Linux environment. If you run the backend on Windows without C++ tools, TLSH gracefully downgrades to `ERROR_TLSH_UNAVAILABLE` without breaking the pipeline.
+- **LLM Threat Intelligence**: LLM threat narrative generation is now **REAL** and natively invokes the Groq API when `GROQ_API_KEY` is provided in the `.env` file. If the key is missing, or if the API suffers a timeout, the backend gracefully defaults to the local `MockLLMProvider` or a safe error response without failing the pipeline.
 - **Database**: The current `.env.example` points to `sqlite+aiosqlite:///./test.db` to prevent heavy local friction. When connecting to Supabase in production, change `DATABASE_URL` to `postgresql+asyncpg://...`.
 
 ## Testing

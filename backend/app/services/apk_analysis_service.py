@@ -159,6 +159,23 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
                     "weight": rule["weight"],
                     "evidence": f"Declared in manifest: {perm}"
                 })
+                
+        # --- DEX / Smali Intelligence Phase ---
+        try:
+            from app.services.dex_analysis_service import analyze_dex
+            dex_results = analyze_dex(a.get_all_dex())
+            
+            # Merge DEX findings and risk factors
+            if "findings_data" in dex_results:
+                findings_data.extend(dex_results.pop("findings_data"))
+            if "risk_factors" in dex_results:
+                dex_risks = dex_results.pop("risk_factors")
+                risk_factors.extend(dex_risks)
+                for r in dex_risks:
+                    risk_score += r.get("weight", 0)
+        except Exception as e:
+            logger.error(f"DEX analysis failed during static analysis: {e}")
+            dex_results = {"error": str(e)}
             
         return {
             "status": "COMPLETED",
@@ -175,7 +192,8 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
             "activities": activities,
             "services": services,
             "receivers": receivers,
-            "risk_factors": risk_factors
+            "risk_factors": risk_factors,
+            "dex_data": dex_results
         }
         
     except Exception as e:

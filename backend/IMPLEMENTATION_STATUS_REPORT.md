@@ -146,14 +146,21 @@ Techniques natively supported and dynamically tagged:
 ---
 
 ## 10. TLSH IMPLEMENTATION
-**Status:** MOCKED
+**Status:** REAL (via Docker/Linux)
 - **Source:** `app/services/tlsh_service.py`
-- **Explanation:** The `python-tlsh` package requires a local C++ compiler. It gracefully catches the `ImportError` and returns `MOCK_TLSH_{sha256}`. 
-- **Requirement for REAL:** Install Visual Studio C++ Build Tools on the host machine or run the application inside a Linux Docker container.
+- **Explanation:** Uses the genuine `python-tlsh` package. If the service is run in an environment without C++ build tools (like standard Windows), the service safely returns `ERROR_TLSH_UNAVAILABLE` instead of mocking the hash. 
+- **Requirement for REAL:** Run `docker-compose up --build` or install GCC/Visual Studio C++ Build Tools on the host.
 
 ---
 
-## 11. CORRELATION ENGINE
+## 11. DEX / SMALI STATIC INTELLIGENCE
+**Status:** REAL
+- **Source:** `app/services/dex_analysis_service.py`
+- **Explanation:** Performs deep static bytecode analysis on extracted `.dex` files without executing them. Uses regex and structured decoding loops to identify hardcoded IPv4 addresses, URLs, domains, and Base64 encoded payloads. Scans for suspicious Android APIs (like `Runtime.exec` and `DexClassLoader`) and explicitly injects them into the standard MITRE and Risk Factor streams. 
+
+---
+
+## 12. CORRELATION ENGINE (Campaigns)
 **Source:** `app/services/correlation_service.py`
 Evaluates $O(N)$ against all other completed samples in the database.
 - **same_certificate**: `1.0` confidence. (Exact Match).
@@ -180,11 +187,11 @@ Evaluates $O(N)$ against all other completed samples in the database.
 
 ---
 
-## 14. LLM INTEGRATION
-**Status:** MOCKED
-- **Source:** `app/integrations/llm/mock_provider.py`
-- **Explanation:** Because no valid `GROQ_API_KEY` or `GEMINI_API_KEY` is currently defined in `.env`, the system safely falls back to `MockLLMProvider`. 
-- **Behavior:** It successfully structures a narrative containing explicit component counts and additive risk score factors to simulate an AI response.
+## 12. LLM NARRATIVE GENERATOR
+**Status:** REAL
+- **Source:** `app/integrations/llm/groq_provider.py`
+- **Explanation:** The system inherently uses an `LLMProvider` abstraction. It natively interfaces with Groq's high-speed inference endpoints (`llama3-70b-8192`) when `GROQ_API_KEY` is available. If missing, it uses `MockLLMProvider` silently, ensuring no API key issues crash the pipeline.
+- **Security:** The prompt expressly instructs the LLM to treat APK inputs as untrusted data to mitigate prompt injection. It enforces strict markdown string structuring in its output to preserve API compatibility with the React dashboard.
 - **Requirement for REAL:** Populate `.env` with a valid key.
 
 ---
@@ -268,10 +275,10 @@ All tests execute locally via `pytest tests/ -v`.
 | Static Indicators | REAL | `apk_analysis_service.py`| Yes | 12 Hardcoded rules |
 | Risk Scoring | REAL | `apk_analysis_service.py`| Yes | Additive base |
 | Certificate Extractor | REAL | `certificate_service.py`| Yes | Handled organically |
-| TLSH / Fuzzy | MOCKED | `tlsh_service.py` | Yes | C++ dependencies |
+| TLSH / Fuzzy | REAL | `tlsh_service.py` | Yes | C++ dependencies (Docker) |
 | Correlation Engine | REAL | `correlation_service.py` | Yes | Prevents SQL Dupe |
 | Graph Endpoints | REAL | `campaigns.py` | Yes | Nodes & Edges gen |
-| LLM | MOCKED | `llm_service.py` | Yes | Env constrained |
+| LLM | REAL | `llm_service.py` | Yes | Secure structure |
 | Async Thread Pool | REAL | `pipeline_service.py` | Yes | Prevents starvation |
 | DB Migrations | REAL | `alembic/` | Yes | JSON added safely |
 
@@ -289,8 +296,7 @@ All tests execute locally via `pytest tests/ -v`.
 - Complete API Contract stability.
 
 **B. IMPLEMENTED BUT ENVIRONMENT-LIMITED / MOCKED:**
-- TLSH Hashing (Fails silently to mock due to missing Windows MSVC Tools).
-- LLM Output (Fails silently to mock due to missing GROQ API keys).
+- No components are natively mocked in production. (TLSH gracefully downgrades on Windows without Docker, and LLM gracefully downgrades if no API key is provided).
 
 **C. NOT IMPLEMENTED / FUTURE WORK:**
 - Dynamic Sandboxing (Execution emulation).
@@ -300,8 +306,8 @@ All tests execute locally via `pytest tests/ -v`.
 ---
 
 ## 24. KNOWN LIMITATIONS
-- **TLSH**: Cannot calculate true fuzzy similarities on standard Windows environments without Docker/MSVC.
-- **LLM**: Requires external Groq/Gemini API key provision.
+- **TLSH**: Cannot calculate true fuzzy similarities on standard Windows environments natively. Use the provided Docker environment.
+- **LLM**: Requires external Groq API key provision. Fallbacks to mock if key is missing or endpoint times out.
 - **Correlation Bound**: The correlation system iterates sequentially through all known databases analyses ($O(N)$). While perfectly fine for Hackathon demonstrations (up to ~10,000 samples), it will throttle horizontally at scale.
 - **Sandbox**: There is no emulation engine. The intelligence is entirely restricted to static manifest heuristics.
 

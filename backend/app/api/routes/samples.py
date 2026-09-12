@@ -24,10 +24,10 @@ async def upload_sample(
     db: AsyncSession = Depends(get_db)
 ):
     """Uploads an APK for analysis and queues the pipeline."""
-    sample = await process_upload(file, source, submitted_by, db)
+    sample = await process_upload(file, source or "", submitted_by or "", db)
     
-    if sample.status == 'QUEUED':
-        background_tasks.add_task(process_sample_pipeline, sample.id)
+    if str(sample.status) == 'QUEUED':
+        background_tasks.add_task(process_sample_pipeline, str(sample.id))
         
     return sample
 
@@ -50,7 +50,7 @@ async def list_samples(
     total = len(total_result.scalars().all())
     
     return PaginatedResponse(
-        items=samples,
+        items=list(samples),
         total=total,
         page=(skip // limit) + 1,
         size=limit
