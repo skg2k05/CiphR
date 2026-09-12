@@ -2,8 +2,9 @@ import asyncio
 from datetime import datetime
 from app.db.database import AsyncSessionLocal
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
-from app.db.models import Sample, Analysis, Finding
+from app.db.models import Sample, Analysis, Finding, sample_campaign_links
 from app.services.apk_analysis_service import analyze_apk_static
 from app.services.correlation_service import run_correlation
 from app.services.llm_service import generate_narrative
@@ -57,12 +58,24 @@ async def process_sample_pipeline(sample_id: str):
             analysis.activities = static_results.get('activities', [])
             analysis.services = static_results.get('services', [])
             analysis.receivers = static_results.get('receivers', [])
+            analysis.providers = static_results.get('providers', [])
+            analysis.permissions = static_results.get('permissions', [])
+            analysis.certificate_details = static_results.get('certificate_details', {})
             analysis.risk_factors = static_results.get('risk_factors', [])
             
             # Save Findings
             findings_data = static_results.get('findings_data', [])
             for f_data in findings_data:
-                finding = Finding(sample_id=sample.id, **f_data)
+                finding = Finding(
+                    sample_id=sample.id,
+                    title=f_data.get("title"),
+                    description=f_data.get("description"),
+                    severity=f_data.get("severity"),
+                    category=f_data.get("category"),
+                    evidence=f_data.get("evidence"),
+                    mitre_technique_id=f_data.get("mitre_technique_id"),
+                    confidence=f_data.get("confidence")
+                )
                 db.add(finding)
                 
             await db.commit()
@@ -77,14 +90,51 @@ async def process_sample_pipeline(sample_id: str):
             analysis.status = 'GENERATING_NARRATIVE'
             await db.commit()
             
+            # Query campaign and correlation context for rich AI explanation
+            camp_result = await db.execute(
+                select(Sample).options(selectinload(Sample.campaigns)).filter(Sample.id == sample.id)
+            )
+            loaded_sample = camp_result.scalars().first()
+            campaign_info = None
+            related_count = 0
+            correlation_reason = None
+            
+            if loaded_sample and loaded_sample.campaigns:
+                target_camp = loaded_sample.campaigns[0]
+                campaign_info = {"id": target_camp.id, "name": target_camp.name}
+                
+                link_count_res = await db.execute(
+                    select(sample_campaign_links).filter(
+                        sample_campaign_links.c.campaign_id == target_camp.id,
+                        sample_campaign_links.c.sample_id != sample.id
+                    )
+                )
+                related_count = len(link_count_res.all())
+                
+                my_link_res = await db.execute(
+                    select(sample_campaign_links).filter(
+                        sample_campaign_links.c.campaign_id == target_camp.id,
+                        sample_campaign_links.c.sample_id == sample.id
+                    )
+                )
+                my_link = my_link_res.first()
+                if my_link:
+                    correlation_reason = my_link.reason
+            
             analysis_dict = {
                 "package_name": analysis.package_name,
                 "app_name": analysis.app_name,
                 "risk_score": analysis.risk_score,
+                "permissions": analysis.permissions,
+                "providers": analysis.providers,
                 "activities": analysis.activities,
                 "services": analysis.services,
                 "receivers": analysis.receivers,
-                "risk_factors": analysis.risk_factors
+                "certificate_details": analysis.certificate_details,
+                "risk_factors": analysis.risk_factors,
+                "campaign": campaign_info,
+                "related_samples_count": related_count,
+                "correlation_reason": correlation_reason
             }
             
             narrative = await generate_narrative(analysis_dict, findings_data)

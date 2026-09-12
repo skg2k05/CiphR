@@ -5,8 +5,8 @@ from sqlalchemy.orm import selectinload
 from typing import List, Optional
 
 from app.db.database import get_db
-from app.db.models import Sample, Analysis, Finding
-from app.schemas.sample import SampleResponse, SampleDetailResponse
+from app.db.models import Sample, Analysis, Finding, sample_campaign_links
+from app.schemas.sample import SampleResponse, SampleDetailResponse, RelatedSampleItem, RelatedSamplesResponse
 from app.schemas.analysis import AnalysisResponse
 from app.schemas.finding import FindingResponse
 from app.schemas.common import PaginatedResponse
@@ -60,13 +60,87 @@ async def list_samples(
 async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Sample)
-        .options(selectinload(Sample.analysis), selectinload(Sample.findings))
+        .options(
+            selectinload(Sample.analysis), 
+            selectinload(Sample.findings),
+            selectinload(Sample.campaigns)
+        )
         .filter(Sample.id == sample_id)
     )
     sample = result.scalars().first()
     if not sample:
         raise HTTPException(status_code=404, detail="Sample not found")
-    return sample
+
+    related_items = []
+    if sample.campaigns:
+        for camp in sample.campaigns:
+            links_res = await db.execute(
+                select(sample_campaign_links).filter(
+                    sample_campaign_links.c.campaign_id == camp.id,
+                    sample_campaign_links.c.sample_id != sample_id
+                )
+            )
+            links = links_res.all()
+            for link in links:
+                rel_sample_res = await db.execute(select(Sample).filter(Sample.id == link.sample_id))
+                rel_sample = rel_sample_res.scalars().first()
+                if rel_sample:
+                    related_items.append(RelatedSampleItem(
+                        sample_id=rel_sample.id,
+                        filename=rel_sample.filename,
+                        sha256=rel_sample.sha256,
+                        relationship=link.relationship,
+                        confidence=link.confidence,
+                        reason=link.reason,
+                        campaign_id=camp.id,
+                        campaign_name=camp.name
+                    ))
+
+    resp = SampleDetailResponse.model_validate(sample)
+    resp.related_samples = related_items
+    resp.related_sample_count = len(related_items)
+    return resp
+
+@router.get("/{sample_id}/related", response_model=RelatedSamplesResponse)
+async def get_related_samples(sample_id: str, db: AsyncSession = Depends(get_db)):
+    """Returns all correlated samples sharing campaigns with this sample."""
+    result = await db.execute(
+        select(Sample).options(selectinload(Sample.campaigns)).filter(Sample.id == sample_id)
+    )
+    sample = result.scalars().first()
+    if not sample:
+        raise HTTPException(status_code=404, detail="Sample not found")
+
+    related_items = []
+    if sample.campaigns:
+        for camp in sample.campaigns:
+            links_res = await db.execute(
+                select(sample_campaign_links).filter(
+                    sample_campaign_links.c.campaign_id == camp.id,
+                    sample_campaign_links.c.sample_id != sample_id
+                )
+            )
+            links = links_res.all()
+            for link in links:
+                rel_sample_res = await db.execute(select(Sample).filter(Sample.id == link.sample_id))
+                rel_sample = rel_sample_res.scalars().first()
+                if rel_sample:
+                    related_items.append(RelatedSampleItem(
+                        sample_id=rel_sample.id,
+                        filename=rel_sample.filename,
+                        sha256=rel_sample.sha256,
+                        relationship=link.relationship,
+                        confidence=link.confidence,
+                        reason=link.reason,
+                        campaign_id=camp.id,
+                        campaign_name=camp.name
+                    ))
+
+    return RelatedSamplesResponse(
+        sample_id=sample_id,
+        total=len(related_items),
+        items=related_items
+    )
 
 @router.get("/{sample_id}/status")
 async def get_sample_status(sample_id: str, db: AsyncSession = Depends(get_db)):

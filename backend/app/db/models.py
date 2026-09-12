@@ -54,9 +54,26 @@ class Analysis(Base):
     activities = Column(JSON)
     services = Column(JSON)
     receivers = Column(JSON)
+    providers = Column(JSON)
+    permissions = Column(JSON)
+    certificate_details = Column(JSON)
     risk_factors = Column(JSON)
 
     sample = relationship("Sample", back_populates="analysis")
+
+    @property
+    def risk_level(self) -> str:
+        score = self.risk_score or 0
+        if score >= 80:
+            return "CRITICAL"
+        elif score >= 60:
+            return "HIGH"
+        elif score >= 40:
+            return "MEDIUM"
+        elif score >= 20:
+            return "LOW"
+        else:
+            return "SAFE"
 
 class Finding(Base):
     __tablename__ = 'findings'

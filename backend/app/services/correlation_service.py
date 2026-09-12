@@ -9,6 +9,16 @@ async def _link_to_campaign(db: AsyncSession, sample_id: str, campaign_id: str, 
     if campaign_id in linked_campaign_ids:
         return False
         
+    existing_link = await db.execute(
+        select(sample_campaign_links).filter(
+            sample_campaign_links.c.sample_id == sample_id,
+            sample_campaign_links.c.campaign_id == campaign_id
+        )
+    )
+    if existing_link.first():
+        linked_campaign_ids.add(campaign_id)
+        return False
+
     stmt = sample_campaign_links.insert().values(
         sample_id=sample_id,
         campaign_id=campaign_id,
@@ -107,26 +117,36 @@ async def run_correlation(sample_id: str, db: AsyncSession):
             if match.sample.campaigns:
                 target_campaign = match.sample.campaigns[0]
             else:
-                # Create a new campaign for this cluster
+                # Create or reuse a campaign for this cluster
                 prefix = cert[:8] if cert else (sample_id[:8])
-                target_campaign = Campaign(
-                    name=f"Campaign-{prefix}",
-                    description="Automatically correlated threat campaign.",
-                    risk_score=max(analysis.risk_score or 0, match.risk_score or 0)
-                )
-                db.add(target_campaign)
-                await db.flush()
+                camp_name = f"Campaign-{prefix}"
+                camp_res = await db.execute(select(Campaign).filter(Campaign.name == camp_name))
+                target_campaign = camp_res.scalars().first()
+                if not target_campaign:
+                    target_campaign = Campaign(
+                        name=camp_name,
+                        description="Automatically correlated threat campaign.",
+                        risk_score=max(analysis.risk_score or 0, match.risk_score or 0)
+                    )
+                    db.add(target_campaign)
+                    await db.flush()
                 
-                # Insert link for the match manually so we can set relationship metadata
-                stmt_match = sample_campaign_links.insert().values(
-                    sample_id=match.sample_id,
-                    campaign_id=target_campaign.id,
-                    relationship=best_signal["relationship"],
-                    confidence=best_signal["confidence"],
-                    reason=best_signal["reason"]
+                # Insert link for the match defensively
+                existing_match_link = await db.execute(
+                    select(sample_campaign_links).filter(
+                        sample_campaign_links.c.sample_id == match.sample_id,
+                        sample_campaign_links.c.campaign_id == target_campaign.id
+                    )
                 )
-                await db.execute(stmt_match)
-                # DO NOT use match.sample.campaigns.append(target_campaign) to avoid IntegrityError
+                if not existing_match_link.first():
+                    stmt_match = sample_campaign_links.insert().values(
+                        sample_id=match.sample_id,
+                        campaign_id=target_campaign.id,
+                        relationship=best_signal["relationship"],
+                        confidence=best_signal["confidence"],
+                        reason=best_signal["reason"]
+                    )
+                    await db.execute(stmt_match)
             
             # Link current sample to target_campaign
             linked = await _link_to_campaign(

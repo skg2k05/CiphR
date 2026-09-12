@@ -13,10 +13,14 @@ class AnalysisBase(BaseModel):
     tlsh: Optional[str] = None
     certificate_fingerprint: Optional[str] = None
     risk_score: Optional[int] = None
+    risk_level: Optional[str] = None
     risk_factors: Optional[list] = None
     activities: Optional[list] = None
     services: Optional[list] = None
     receivers: Optional[list] = None
+    providers: Optional[list] = None
+    permissions: Optional[list] = None
+    certificate_details: Optional[dict] = None
     threat_narrative: Optional[str] = None
 
 class AnalysisCreate(AnalysisBase):

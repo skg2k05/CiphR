@@ -14,7 +14,7 @@ def test_indicator_rules():
     assert 'android.permission.BIND_DEVICE_ADMIN' in INDICATOR_RULES
     rule = INDICATOR_RULES['android.permission.BIND_DEVICE_ADMIN']
     assert rule['weight'] == 50
-    assert rule['mitre_technique_id'] == 'T1624'
+    assert rule['mitre_technique_id'] == 'T1626.001'
 
 @pytest.mark.asyncio
 async def test_run_correlation_shared_indicator(db_session):
@@ -58,12 +58,12 @@ async def test_run_correlation_shared_indicator(db_session):
     await db_session.commit()
 
 def test_extended_indicator_rules():
-    """Verify new high-risk fraud indicators are registered with valid MITRE mappings."""
+    """Verify new high-risk fraud indicators are registered with valid MITRE ATT&CK Mobile mappings."""
     assert 'android.permission.REQUEST_INSTALL_PACKAGES' in INDICATOR_RULES
-    assert INDICATOR_RULES['android.permission.REQUEST_INSTALL_PACKAGES']['mitre_technique_id'] == 'T1475'
+    assert INDICATOR_RULES['android.permission.REQUEST_INSTALL_PACKAGES']['mitre_technique_id'] == 'T1476'
 
     assert 'android.permission.BIND_NOTIFICATION_LISTENER_SERVICE' in INDICATOR_RULES
-    assert INDICATOR_RULES['android.permission.BIND_NOTIFICATION_LISTENER_SERVICE']['mitre_technique_id'] == 'T1636'
+    assert INDICATOR_RULES['android.permission.BIND_NOTIFICATION_LISTENER_SERVICE']['mitre_technique_id'] == 'T1517'
 
     assert 'android.permission.QUERY_ALL_PACKAGES' in INDICATOR_RULES
     assert INDICATOR_RULES['android.permission.QUERY_ALL_PACKAGES']['mitre_technique_id'] == 'T1418'
