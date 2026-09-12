@@ -29,11 +29,27 @@ def _create_base_sample():
     )
     return sample
 
-def _create_mock_db():
+def _create_mock_db(links_data=None, related_ids=None):
+    if links_data is None: links_data = []
+    if related_ids is None: related_ids = []
+    
     db = AsyncMock(spec=AsyncSession)
-    mock_result = MagicMock()
-    mock_result.all.return_value = []
-    db.execute.return_value = mock_result
+    
+    # First call is for links (returns objects with .signals)
+    mock_links_result = MagicMock()
+    mock_links = []
+    for link in links_data:
+        mock_row = MagicMock()
+        mock_row.signals = link.get("signals", [])
+        mock_links.append(mock_row)
+    mock_links_result.all.return_value = mock_links
+    
+    # Second call is for related sample ids (returns tuples/rows with index 0)
+    mock_related_result = MagicMock()
+    mock_related = [[rid] for rid in related_ids]
+    mock_related_result.all.return_value = mock_related
+    
+    db.execute.side_effect = [mock_links_result, mock_related_result]
     return db
 
 @pytest.mark.asyncio
@@ -120,14 +136,27 @@ async def test_campaign_matched_sample():
     )
     
     # Mock campaign
-    mock_campaign = Campaign(id=str(uuid.uuid4()), name="TestCampaign")
+    mock_campaign = Campaign(
+        id=str(uuid.uuid4()), 
+        name="TestCampaign",
+        intelligence_summary={"common_indicators": {"ips": ["1.1.1.1"]}}
+    )
     sample.campaigns = [mock_campaign]
+    
+    # we need the second call to db.execute to return related_ids
+    db = _create_mock_db(links_data=[], related_ids=["sample2", "sample3", "sample2"])
     
     decision = await build_threat_decision(sample, db)
     
     assert decision.classification == ThreatClassification.MALICIOUS
     assert decision.campaign.status == CampaignStatus.MATCHED
+    assert decision.campaign.related_samples_count == 2 # deduplicated
+    assert decision.campaign.related_sample_ids == ["sample2", "sample3"]
+    assert decision.campaign.intelligence == {"common_indicators": {"ips": ["1.1.1.1"]}}
+    
+    # Novelty should correctly map related_samples
     assert decision.novelty.status == NoveltyStatus.VARIANT
+    assert decision.novelty.related_samples == ["sample2", "sample3"]
     assert decision.confidence == ConfidenceLevel.HIGH
 
 @pytest.mark.asyncio

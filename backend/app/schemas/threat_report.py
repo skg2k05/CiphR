@@ -10,7 +10,8 @@ from app.schemas.threat_decision import (
     ThreatType,
     RecommendedAction,
     ProvenanceInfo,
-    NoveltySignal
+    NoveltySignal,
+    CampaignInfo
 )
 
 class HistoricalContextItem(BaseModel):
@@ -27,6 +28,8 @@ class AnalystThreatReportResponse(BaseModel):
     impact: ImpactLevel
     access_scope: AccessScope
     threat_types: List[ThreatType]
+    
+    campaign: Optional[CampaignInfo] = None
     
     # "why" is a dictionary of grouped evidence by categories like "STATIC", "NETWORK", "STRUCTURAL", etc.
     why: Dict[str, List[str]]

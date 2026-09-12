@@ -86,6 +86,8 @@ class CampaignInfo(BaseModel):
     status: CampaignStatus = CampaignStatus.UNKNOWN
     identifier: Optional[str] = None
     related_samples_count: int = 0
+    related_sample_ids: List[str] = []
+    intelligence: Optional[Dict[str, Any]] = None
 
 class ProvenanceInfo(BaseModel):
     source_type: str = "upload"

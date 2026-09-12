@@ -54,6 +54,21 @@ async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecis
     )
     links = links_result.all()
     
+    related_sample_ids = []
+    campaign_intelligence = None
+    
+    if camp_status == CampaignStatus.MATCHED and camp_identifier:
+        rel_links_result = await db.execute(
+            select(sample_campaign_links.c.sample_id)
+            .where(sample_campaign_links.c.campaign_id == camp_identifier)
+            .where(sample_campaign_links.c.sample_id != sample.id)
+        )
+        # Deduplicate while preserving order
+        related_sample_ids = list(dict.fromkeys([row[0] for row in rel_links_result.all()]))
+        
+        camp_obj = sample.campaigns[0]
+        campaign_intelligence = getattr(camp_obj, 'intelligence_summary', None)
+    
     # --- Novelty Signals ---
     novelty_signals = []
     
@@ -153,7 +168,7 @@ async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecis
     novelty_info = NoveltyInfo(
         status=novelty_status,
         signals=novelty_signals,
-        related_samples=[],
+        related_samples=related_sample_ids,
         explanation=explanation
     )
 
@@ -271,7 +286,9 @@ async def build_threat_decision(sample: Sample, db: AsyncSession) -> ThreatDecis
         campaign=CampaignInfo(
             status=camp_status,
             identifier=camp_identifier,
-            related_samples_count=0
+            related_samples_count=len(related_sample_ids),
+            related_sample_ids=related_sample_ids,
+            intelligence=campaign_intelligence
         ),
         evidence=evidence_items,
         recommended_action=recommended_action,

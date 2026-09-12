@@ -96,6 +96,7 @@ def build_analyst_report(decision: ThreatDecisionResponse) -> AnalystThreatRepor
         impact=decision.impact,
         access_scope=decision.access_scope,
         threat_types=decision.threat_types,
+        campaign=decision.campaign,
         why=why_groups,
         historical_context=historical_context,
         recommended_action=decision.recommended_action,

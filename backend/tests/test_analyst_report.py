@@ -42,6 +42,7 @@ def test_malicious_report():
     ]
     decision.threat_types = [ThreatType.CREDENTIAL_THEFT, ThreatType.OVERLAY]
     decision.recommended_action = RecommendedAction.QUARANTINE
+    decision.campaign = CampaignInfo(status=CampaignStatus.MATCHED, identifier="campaign_123", related_samples_count=5)
     
     report = build_analyst_report(decision)
     
@@ -54,6 +55,10 @@ def test_malicious_report():
     assert len(report.historical_context) == 1
     assert report.historical_context[0].type == "TLSH_SIMILARITY"
     assert "STRONG (Distance 20)" in report.historical_context[0].evidence
+    
+    assert report.campaign is not None
+    assert report.campaign.status == CampaignStatus.MATCHED
+    assert report.campaign.related_samples_count == 5
 
 def test_benign_report():
     decision = _create_base_decision()
