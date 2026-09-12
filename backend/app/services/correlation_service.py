@@ -40,7 +40,8 @@ async def recalculate_campaign_intelligence(db: AsyncSession, campaign_id: str):
         
     analyses = [s.analysis for s in campaign.samples if s.analysis]
     
-    num_samples = len(campaign.samples)
+    samples = list(campaign.samples) # type: ignore
+    num_samples = len(samples)
     if num_samples == 0:
         return
         

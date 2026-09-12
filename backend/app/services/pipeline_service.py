@@ -120,6 +120,23 @@ async def process_sample_pipeline(sample_id: str):
             narrative = await generate_narrative(analysis_dict, findings_data)
             analysis.threat_narrative = narrative  # type: ignore
             
+            # --- SHADOW MODE HOOK (Phase 6F) ---
+            from app.core.config import settings
+            if settings.FUSION_SHADOW_ENABLED:
+                try:
+                    from app.fusion.shadow import run_shadow_fusion
+                    await run_shadow_fusion(
+                        sample=sample,
+                        analysis=analysis,
+                        static_results=static_results,
+                        findings_data=findings_data,
+                        campaign_summary=campaign_summary,
+                        narrative=narrative
+                    )
+                except Exception as shadow_err:
+                    logger.error(f"Shadow fusion failed for {sample_id}, preserving legacy pipeline: {shadow_err}", exc_info=True)
+            # -----------------------------------
+            
             # 5. Mark Completed
             analysis.status = 'COMPLETED'  # type: ignore
             analysis.completed_at = datetime.now(timezone.utc)  # type: ignore

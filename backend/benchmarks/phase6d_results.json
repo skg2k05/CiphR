@@ -1,0 +1,97 @@
+{
+  "apk_benchmark": [
+    {
+      "filename": "ApiDemos-debug.apk",
+      "sha256": "354b56605e8f201ce5fdd5b796524d8fabae726ee57de2d76dcf878c4d7826f1",
+      "feature_extraction_success": true,
+      "feature_dimension": 2568,
+      "inference_success": true,
+      "raw_score": 0.3983871671279465,
+      "total_time_s": 4.5306,
+      "error": null
+    },
+    {
+      "filename": "ApiDemos-debug2.apk",
+      "sha256": "4a571ee9f2ed22e2ca032fc6d75083ebd1cf87f3e4386547218d8f947fcc0f99",
+      "feature_extraction_success": true,
+      "feature_dimension": 2568,
+      "inference_success": true,
+      "raw_score": 0.3983871671279465,
+      "total_time_s": 2.7924,
+      "error": null
+    },
+    {
+      "filename": "dummy.apk",
+      "sha256": "c6b8f2e69c822ffe6d0303fa5f49b1bd115fbdc684c5759f578be1d30825d9dc",
+      "feature_extraction_success": true,
+      "feature_dimension": 2568,
+      "inference_success": true,
+      "raw_score": 0.023504409767698818,
+      "total_time_s": 0.095,
+      "error": null
+    },
+    {
+      "filename": "dummy2.apk",
+      "sha256": "d6f175817f886ec6fbbc1515326465fa96c3bfd54a4ea06cfd6dbbd8340e0152",
+      "feature_extraction_success": true,
+      "feature_dimension": 2568,
+      "inference_success": true,
+      "raw_score": 0.010086580958002864,
+      "total_time_s": 0.0958,
+      "error": null
+    }
+  ],
+  "determinism": [
+    {
+      "run": 1,
+      "score": 0.3983871671279465,
+      "feature_dimension": 2568,
+      "inference_success": true
+    },
+    {
+      "run": 2,
+      "score": 0.3983871671279465,
+      "feature_dimension": 2568,
+      "inference_success": true
+    },
+    {
+      "run": 3,
+      "score": 0.3983871671279465,
+      "feature_dimension": 2568,
+      "inference_success": true
+    }
+  ],
+  "failure_tests": [
+    {
+      "test": "Nonexistent file",
+      "expected": "controlled failure (file not found)",
+      "actual": "inference_success=False, error=File does not exist: /nonexistent/path/to/malware.apk",
+      "status": "PASS"
+    },
+    {
+      "test": "Directory instead of file",
+      "expected": "controlled failure (is directory)",
+      "actual": "inference_success=False, error=Path is a directory, not a file: C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\tests\\fixtures",
+      "status": "PASS"
+    },
+    {
+      "test": "Empty path",
+      "expected": "controlled failure (empty path)",
+      "actual": "inference_success=False, error=APK path is empty or None",
+      "status": "PASS"
+    },
+    {
+      "test": "Missing model",
+      "expected": "controlled failure (model not found)",
+      "actual": "inference_success=False, error=Model file not found: /nonexistent/model/EMBER2024_APK.model",
+      "status": "PASS"
+    }
+  ],
+  "performance": {
+    "model_load_s": 0.0152,
+    "feature_extraction_s": 2.7815,
+    "inference_s": 0.0006,
+    "total_end_to_end_s": 2.8036,
+    "sample": "ApiDemos-debug.apk"
+  }
+}

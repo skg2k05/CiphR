@@ -1,0 +1,66 @@
+[
+  {
+    "sample_id": "8dddc356-5468-47da-86ac-6f539ac2ea08",
+    "filename": "354b56605e8f201ce5fdd5b796524d8fabae726ee57de2d76dcf878c4d7826f1.apk",
+    "legacy_time_s": 5.523169040679932,
+    "shadow_time_s": 22.24358820915222,
+    "overhead_s": 16.72041916847229,
+    "legacy_score": 100,
+    "shadow_score": 100,
+    "legacy_status": "COMPLETED",
+    "shadow_status": "COMPLETED",
+    "invariant_preserved": true,
+    "shadow_telemetry": {
+      "timestamp": "2026-09-12T10:00:20.766767+00:00",
+      "sample_id": "8dddc356-5468-47da-86ac-6f539ac2ea08",
+      "execution_time_ms": 13401.820000000002,
+      "legacy": {
+        "risk_score": 100,
+        "status": "GENERATING_NARRATIVE"
+      },
+      "shadow": {
+        "fusion_status": "UNRESOLVED",
+        "evidence_count": 11,
+        "positive_count": 7,
+        "negative_count": 0,
+        "conflict_count": 0,
+        "corroboration_count": 0,
+        "missing_providers": [
+          "VT evidence is missing or unavailable."
+        ]
+      }
+    }
+  },
+  {
+    "sample_id": "430f21d8-5cf3-42d6-b4a7-afe97a5e69bc",
+    "filename": "4a571ee9f2ed22e2ca032fc6d75083ebd1cf87f3e4386547218d8f947fcc0f99.apk",
+    "legacy_time_s": 16.00422978401184,
+    "shadow_time_s": 35.23526477813721,
+    "overhead_s": 19.231034994125366,
+    "legacy_score": 100,
+    "shadow_score": 100,
+    "legacy_status": "COMPLETED",
+    "shadow_status": "COMPLETED",
+    "invariant_preserved": true,
+    "shadow_telemetry": {
+      "timestamp": "2026-09-12T10:01:12.051701+00:00",
+      "sample_id": "430f21d8-5cf3-42d6-b4a7-afe97a5e69bc",
+      "execution_time_ms": 7764.405,
+      "legacy": {
+        "risk_score": 100,
+        "status": "GENERATING_NARRATIVE"
+      },
+      "shadow": {
+        "fusion_status": "UNRESOLVED",
+        "evidence_count": 11,
+        "positive_count": 7,
+        "negative_count": 0,
+        "conflict_count": 0,
+        "corroboration_count": 0,
+        "missing_providers": [
+          "VT evidence is missing or unavailable."
+        ]
+      }
+    }
+  }
+]
