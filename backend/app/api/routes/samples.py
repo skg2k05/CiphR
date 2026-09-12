@@ -13,8 +13,9 @@ from app.schemas.common import PaginatedResponse
 from app.services.upload_service import process_upload
 from app.services.pipeline_service import process_sample_pipeline
 from app.core.utils import validate_uuid
+from app.core.auth import get_api_key
 
-router = APIRouter(prefix="/samples", tags=["Samples"])
+router = APIRouter(prefix="/samples", tags=["Samples"], dependencies=[Depends(get_api_key)])
 
 @router.post("/upload", response_model=SampleResponse)
 async def upload_sample(

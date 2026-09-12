@@ -10,8 +10,9 @@ from app.schemas.campaign import CampaignResponse, CampaignDetailResponse, Campa
 from app.schemas.sample import SampleResponse
 from app.schemas.common import PaginatedResponse
 from app.core.utils import validate_uuid
+from app.core.auth import get_api_key
 
-router = APIRouter(prefix="/campaigns", tags=["Campaigns"])
+router = APIRouter(prefix="/campaigns", tags=["Campaigns"], dependencies=[Depends(get_api_key)])
 
 @router.get("", response_model=PaginatedResponse[CampaignResponse])
 async def list_campaigns(

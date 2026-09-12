@@ -10,7 +10,7 @@ from app.services.dex_analysis_service import analyze_dex
 async def test_concurrent_duplicate_upload():
     """Verify concurrent uploads of the same APK are deduplicated safely without 500s."""
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"X-API-Key": "test_mock_key"}) as ac:
         with patch('app.services.upload_service.validate_apk_file', return_value=True):
             with patch('app.api.routes.samples.BackgroundTasks.add_task'):
                 # Simulate two exact same uploads
@@ -59,7 +59,7 @@ def test_prompt_injection():
 async def test_path_traversal():
     """Verify malformed archive/file paths are safely contained/rejected."""
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"X-API-Key": "test_mock_key"}) as ac:
         with patch('app.services.upload_service.validate_apk_file', return_value=True):
             with patch('app.api.routes.samples.BackgroundTasks.add_task'):
                 # Windows traversal style

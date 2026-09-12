@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Table, Text, JSON
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Table, Text, JSON, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -87,3 +87,13 @@ class Campaign(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     samples = relationship("Sample", secondary=sample_campaign_links, back_populates="campaigns")
+
+class APIKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    key_hash = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_used_at = Column(DateTime, nullable=True)
+

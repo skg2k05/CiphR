@@ -10,7 +10,7 @@ from app.core.utils import validate_uuid
 from app.services.dex_analysis_service import analyze_dex
 from fastapi import HTTPException
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-API-Key": "test_mock_key"})
 
 def test_validate_uuid_success():
     valid_id = str(uuid.uuid4())
