@@ -28,6 +28,7 @@ Your React workflow should be:
 1. `POST /samples/upload` -> Returns a `sample_id` and `status: "QUEUED"`.
 2. Display a loading spinner or progress bar.
 3. Every ~2 seconds, `GET /samples/{sample_id}/status`.
+   *Note: If the UUID is malformed, this will immediately return a `404 Not Found` to prevent cascading database errors.*
 4. If `stages.pipeline` == `COMPLETED`, stop polling. Fetch `/analysis` and `/findings`.
 5. If `stages.pipeline` == `FAILED`, stop polling and display the `error` string.
 

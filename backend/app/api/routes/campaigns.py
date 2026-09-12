@@ -9,6 +9,7 @@ from app.db.models import Campaign, Sample, sample_campaign_links
 from app.schemas.campaign import CampaignResponse, CampaignDetailResponse, CampaignGraph, CampaignGraphNode, CampaignGraphEdge
 from app.schemas.sample import SampleResponse
 from app.schemas.common import PaginatedResponse
+from app.core.utils import validate_uuid
 
 router = APIRouter(prefix="/campaigns", tags=["Campaigns"])
 
@@ -34,6 +35,7 @@ async def list_campaigns(
 
 @router.get("/{campaign_id}", response_model=CampaignDetailResponse)
 async def get_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(campaign_id, "Campaign")
     result = await db.execute(select(Campaign).filter(Campaign.id == campaign_id))
     campaign = result.scalars().first()
     if not campaign:
@@ -42,6 +44,7 @@ async def get_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{campaign_id}/samples", response_model=List[SampleResponse])
 async def get_campaign_samples(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(campaign_id, "Campaign")
     result = await db.execute(
         select(Campaign)
         .options(selectinload(Campaign.samples))
@@ -55,6 +58,8 @@ async def get_campaign_samples(campaign_id: str, db: AsyncSession = Depends(get_
 @router.get("/{campaign_id}/graph", response_model=CampaignGraph)
 async def get_campaign_graph(campaign_id: str, db: AsyncSession = Depends(get_db)):
     """Returns a graph representation of the campaign for the frontend."""
+    validate_uuid(campaign_id, "Campaign")
+    
     # 1. Verify Campaign exists
     result = await db.execute(select(Campaign).filter(Campaign.id == campaign_id))
     campaign = result.scalars().first()

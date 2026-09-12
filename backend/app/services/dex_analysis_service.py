@@ -56,7 +56,7 @@ def analyze_dex(dex_bytes_generator) -> Dict[str, Any]:
     Performs static-only analysis of DEX bytes.
     Extracts URLs, IPs, Domains, Suspicious APIs, and Base64 strings.
     """
-    result = {
+    result: Dict[str, Any] = {
         "dex_files_analyzed": 0,
         "suspicious_apis": [],
         "hardcoded_ips": [],
@@ -90,34 +90,40 @@ def analyze_dex(dex_bytes_generator) -> Dict[str, Any]:
                     except Exception:
                         continue
                         
-                    # Ignore tiny strings
-                    if len(s) < 5:
+                    # Ignore tiny strings and excessively large strings (prevent ReDoS/OOM)
+                    if len(s) < 5 or len(s) > 10000:
                         continue
                         
                     # IPv4
-                    for ip in IPV4_REGEX.findall(s):
-                        if ip not in unique_ips:
-                            unique_ips.add(ip)
-                            result["hardcoded_ips"].append({
-                                "indicator": ip,
-                                "type": "hardcoded_ip",
-                                "source": "dex_string",
-                                "reason": "Hardcoded IPv4 address observed in application code"
-                            })
+                    if len(unique_ips) < 200:
+                        for ip in IPV4_REGEX.findall(s):
+                            if len(unique_ips) >= 200:
+                                break
+                            if ip not in unique_ips:
+                                unique_ips.add(ip)
+                                result["hardcoded_ips"].append({
+                                    "indicator": ip,
+                                    "type": "hardcoded_ip",
+                                    "source": "dex_string",
+                                    "reason": "Hardcoded IPv4 address observed in application code"
+                                })
                             
                     # URLs
-                    for url in URL_REGEX.findall(s):
-                        if url not in unique_urls:
-                            unique_urls.add(url)
-                            result["urls"].append({
-                                "indicator": url,
-                                "type": "url",
-                                "source": "dex_string",
-                                "reason": "Hardcoded URL observed in application code"
-                            })
+                    if len(unique_urls) < 200:
+                        for url in URL_REGEX.findall(s):
+                            if len(unique_urls) >= 200:
+                                break
+                            if url not in unique_urls:
+                                unique_urls.add(url)
+                                result["urls"].append({
+                                    "indicator": url,
+                                    "type": "url",
+                                    "source": "dex_string",
+                                    "reason": "Hardcoded URL observed in application code"
+                                })
                             
                     # Base64
-                    if is_valid_base64(s):
+                    if len(unique_encoded) < 200 and is_valid_base64(s):
                         if s not in unique_encoded:
                             unique_encoded.add(s)
                             
@@ -155,34 +161,39 @@ def analyze_dex(dex_bytes_generator) -> Dict[str, Any]:
                     
                     if clean_class_name in SUSPICIOUS_APIS:
                         rule = SUSPICIOUS_APIS[clean_class_name]
-                        if method_name in rule['methods']:
-                            api_sig = f"{clean_class_name}.{method_name}"
-                            if api_sig not in detected_apis:
-                                detected_apis.add(api_sig)
-                                
-                                result["suspicious_apis"].append({
-                                    "api": api_sig,
-                                    "class": clean_class_name,
-                                    "method": method_name,
-                                    "source": "dex_method",
-                                    "reason": rule["reason"]
-                                })
-                                
-                                result["risk_factors"].append({
-                                    "indicator": api_sig,
-                                    "weight": rule["weight"],
-                                    "evidence": f"Suspicious API usage detected in DEX: {api_sig}"
-                                })
-                                
-                                result["findings_data"].append({
-                                    "title": f"Suspicious API: {api_sig}",
-                                    "description": rule["reason"],
-                                    "severity": "HIGH",
-                                    "category": "Code",
-                                    "evidence": api_sig,
-                                    "mitre_technique_id": rule.get("mitre"),
-                                    "confidence": 1.0
-                                })
+                        methods = rule.get('methods', [])
+                        if isinstance(methods, list) and method_name in methods:
+                            if len(result["suspicious_apis"]) < 200:
+                                api_sig = f"{clean_class_name}.{method_name}"
+                                if api_sig not in detected_apis:
+                                    detected_apis.add(api_sig)
+                                    
+                                    result["suspicious_apis"].append({
+                                        "api": api_sig,
+                                        "class": clean_class_name,
+                                        "method": method_name,
+                                        "source": "dex_method",
+                                        "reason": str(rule.get("reason", ""))
+                                    })
+                                    
+                                    weight_val = rule.get("weight", 0)
+                                    weight = int(weight_val) if isinstance(weight_val, (int, str)) else 0
+                                    
+                                    result["risk_factors"].append({
+                                        "indicator": api_sig,
+                                        "weight": weight,
+                                        "evidence": f"Suspicious API usage detected in DEX: {api_sig}"
+                                    })
+                                    
+                                    result["findings_data"].append({
+                                        "title": f"Suspicious API: {api_sig}",
+                                        "description": str(rule.get("reason", "")),
+                                        "severity": "HIGH",
+                                        "category": "Code",
+                                        "evidence": api_sig,
+                                        "mitre_technique_id": str(rule.get("mitre", "")),
+                                        "confidence": 1.0
+                                    })
 
             except Exception as e:
                 logger.error(f"Failed to parse individual DEX file: {e}")

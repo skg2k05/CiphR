@@ -5,12 +5,20 @@ from app.core.exceptions import CiphRException, ciphr_exception_handler, global_
 from app.core.logging import logger
 from app.api.routes import health
 import os
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info(f"Starting {settings.PROJECT_NAME}...")
+    yield
+    logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.PROJECT_NAME,
         version=settings.VERSION,
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        lifespan=lifespan,
     )
 
     # CORS settings
@@ -39,10 +47,3 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-@app.on_event("startup")
-async def on_startup():
-    logger.info(f"Starting {settings.PROJECT_NAME}...")
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    logger.info(f"Shutting down {settings.PROJECT_NAME}...")

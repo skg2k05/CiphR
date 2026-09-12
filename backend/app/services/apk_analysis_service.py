@@ -118,13 +118,13 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
         min_sdk = a.get_min_sdk_version()
         target_sdk = a.get_target_sdk_version()
         
-        # Components
-        activities = a.get_activities()
-        services = a.get_services()
-        receivers = a.get_receivers()
+        # Components (bounded)
+        activities = a.get_activities()[:500]
+        services = a.get_services()[:500]
+        receivers = a.get_receivers()[:500]
         
-        # Permissions
-        permissions = set(a.get_permissions())
+        # Permissions (bounded)
+        permissions = set(list(a.get_permissions())[:500])
         
         # Certificate
         cert_fingerprint = extract_certificate_fingerprint(a)
@@ -140,7 +140,7 @@ def analyze_apk_static(file_path: str, db: AsyncSession) -> dict:
         for perm in permissions:
             if perm in INDICATOR_RULES:
                 rule = INDICATOR_RULES[perm]
-                risk_score += rule["weight"]
+                risk_score += int(rule.get("weight", 0))
                 
                 # Add to findings (will map to Finding DB model)
                 findings_data.append({

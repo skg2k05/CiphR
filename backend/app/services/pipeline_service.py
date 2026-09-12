@@ -136,4 +136,9 @@ async def process_sample_pipeline(sample_id: str):
                 analysis.status = 'FAILED'  # type: ignore
                 analysis.error_message = str(e)  # type: ignore
                 analysis.completed_at = datetime.now(timezone.utc)  # type: ignore
-            await db.commit()
+                
+            try:
+                await db.commit()
+            except Exception as commit_error:
+                logger.error(f"Failed to commit FAILED status for sample {sample_id}: {commit_error}")
+                await db.rollback()

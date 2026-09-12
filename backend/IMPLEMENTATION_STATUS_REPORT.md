@@ -226,15 +226,18 @@ Implemented Models:
 - **APK Execution Prevention**: SAFE (Never invoked; merely unzipped heuristically).
 - **Path Traversal / ZIP bombs**: SAFE (Blocked in `validate_apk_file`).
 - **File Size Limits**: SAFE (Streaming bytes evaluation limits to 100MB).
+- **Resource Bounding**: SAFE (Extracted activities, services, receivers, IPs, URLs, Domains, APIs, and Base64 payloads are strictly capped to prevent DoS via JSON bloat or Regex ReDoS).
 - **SQL Injection**: SAFE (SQLAlchemy ORM guarantees parameterized execution).
 - **Subprocess Execution**: SAFE (No `subprocess` or `shell=True` usage anywhere in the pipeline).
+- **API Inputs**: SAFE (Invalid UUIDs gracefully return 404s/400s without cascading to unhandled database drivers).
+- **Duplicate Concurrency**: SAFE (Upload endpoints gracefully catch `IntegrityError` collisions to return deduplicated analysis results without 500 crashes).
 
 ---
 
 ## 19. TESTING
 All tests execute locally via `pytest tests/ -v`.
-- **Collected**: 5
-- **Passed**: 5
+- **Collected**: 21
+- **Passed**: 21
 - **Failed**: 0
 - **Coverage**:
   - `test_indicator_rules`: Proves MITRE weights.
@@ -242,6 +245,10 @@ All tests execute locally via `pytest tests/ -v`.
   - `test_health_endpoint`: Proves API boots.
   - `test_get_campaigns_empty`: Proves database isolation.
   - `test_get_samples_empty`: Proves database isolation.
+  - `test_hardening`: Proves resource limits, duplicate uploads, and UUID validations gracefully catch.
+  - `test_llm`: Proves mock generation fallback, API keys, and timeout resiliences.
+  - `test_tlsh`: Proves fuzzy matching mechanics.
+  - `test_dex`: Proves bytecode evaluation safely runs.
 
 ---
 
@@ -267,19 +274,20 @@ All tests execute locally via `pytest tests/ -v`.
 
 | Feature | Status | Source | Verified | Notes |
 |---------|--------|--------|----------|-------|
-| FastAPI | REAL | `main.py` | Yes | Functional |
-| Upload & Size Validation | REAL | `upload_service.py` | Yes | Rejects ZIP bombs |
+| FastAPI | REAL | `main.py` | Yes | Functional (Lifespan integrated) |
+| Upload & Size Validation | REAL | `upload_service.py` | Yes | Rejects ZIP bombs & race dupes |
 | SHA-256 Dup Detection | REAL | `upload_service.py` | Yes | Yields `200 OK` |
 | Androguard Manifest | REAL | `apk_analysis_service.py`| Yes | Real extraction |
-| Components (Act/Svc/Rec) | REAL | `apk_analysis_service.py`| Yes | Exposed via JSON |
+| Components (Act/Svc/Rec) | REAL | `apk_analysis_service.py`| Yes | Capped to 500 items |
 | Static Indicators | REAL | `apk_analysis_service.py`| Yes | 12 Hardcoded rules |
 | Risk Scoring | REAL | `apk_analysis_service.py`| Yes | Additive base |
 | Certificate Extractor | REAL | `certificate_service.py`| Yes | Handled organically |
 | TLSH / Fuzzy | REAL | `tlsh_service.py` | Yes | C++ dependencies (Docker) |
+| DEX Static Analysis | REAL | `dex_analysis_service.py`| Yes | URLs, Base64, IPs (Capped) |
 | Correlation Engine | REAL | `correlation_service.py` | Yes | Prevents SQL Dupe |
-| Graph Endpoints | REAL | `campaigns.py` | Yes | Nodes & Edges gen |
+| Graph Endpoints | REAL | `campaigns.py` | Yes | Nodes & Edges gen (Validated UUIDs) |
 | LLM | REAL | `llm_service.py` | Yes | Secure structure |
-| Async Thread Pool | REAL | `pipeline_service.py` | Yes | Prevents starvation |
+| Async Thread Pool | REAL | `pipeline_service.py` | Yes | State transitions are crash-proof |
 | DB Migrations | REAL | `alembic/` | Yes | JSON added safely |
 
 ---

@@ -12,6 +12,7 @@ from app.schemas.finding import FindingResponse
 from app.schemas.common import PaginatedResponse
 from app.services.upload_service import process_upload
 from app.services.pipeline_service import process_sample_pipeline
+from app.core.utils import validate_uuid
 
 router = APIRouter(prefix="/samples", tags=["Samples"])
 
@@ -58,6 +59,7 @@ async def list_samples(
 
 @router.get("/{sample_id}", response_model=SampleDetailResponse)
 async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(sample_id, "Sample")
     result = await db.execute(
         select(Sample)
         .options(selectinload(Sample.analysis), selectinload(Sample.findings))
@@ -70,6 +72,7 @@ async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{sample_id}/status")
 async def get_sample_status(sample_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(sample_id, "Sample")
     result = await db.execute(select(Sample).filter(Sample.id == sample_id))
     sample = result.scalars().first()
     if not sample:
@@ -90,6 +93,7 @@ async def get_sample_status(sample_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{sample_id}/analysis", response_model=AnalysisResponse)
 async def get_sample_analysis(sample_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(sample_id, "Sample")
     result = await db.execute(select(Analysis).filter(Analysis.sample_id == sample_id))
     analysis = result.scalars().first()
     if not analysis:
@@ -98,6 +102,7 @@ async def get_sample_analysis(sample_id: str, db: AsyncSession = Depends(get_db)
 
 @router.get("/{sample_id}/findings", response_model=List[FindingResponse])
 async def get_sample_findings(sample_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(sample_id, "Sample")
     result = await db.execute(select(Finding).filter(Finding.sample_id == sample_id))
     findings = result.scalars().all()
     return findings
