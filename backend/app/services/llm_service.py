@@ -2,6 +2,7 @@ from app.core.config import settings
 from app.integrations.llm.base import LLMProvider
 from app.integrations.llm.mock_provider import MockLLMProvider
 from app.integrations.llm.groq_provider import GroqProvider
+from app.integrations.llm.gemini_provider import GeminiProvider
 
 def get_llm_provider() -> LLMProvider:
     """Factory to return the configured LLM provider."""
@@ -11,7 +12,7 @@ def get_llm_provider() -> LLMProvider:
         
     # Fallback to Gemini if added in the future
     if settings.GEMINI_API_KEY:
-        pass # Placeholder for Gemini
+        return GeminiProvider(api_key=settings.GEMINI_API_KEY)
         
     # Fallback to mock if no keys are missing
     return MockLLMProvider()
