@@ -75,6 +75,8 @@ async def list_samples(
     )
 
 from app.services.threat_decision_service import build_threat_decision
+from app.services.analyst_report_service import build_analyst_report
+from app.schemas.threat_report import AnalystThreatReportResponse
 
 @router.get("/{sample_id}", response_model=SampleDetailResponse)
 async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
@@ -92,6 +94,21 @@ async def get_sample(sample_id: str, db: AsyncSession = Depends(get_db)):
     sample_response = SampleDetailResponse.model_validate(sample)
     sample_response.threat_decision = await build_threat_decision(sample, db)
     return sample_response
+
+@router.get("/{sample_id}/report", response_model=AnalystThreatReportResponse)
+async def get_sample_report(sample_id: str, db: AsyncSession = Depends(get_db)):
+    validate_uuid(sample_id, "Sample")
+    result = await db.execute(
+        select(Sample)
+        .options(selectinload(Sample.analysis), selectinload(Sample.findings), selectinload(Sample.campaigns))
+        .filter(Sample.id == sample_id)
+    )
+    sample = result.scalars().first()
+    if not sample:
+        raise HTTPException(status_code=404, detail="Sample not found")
+        
+    decision = await build_threat_decision(sample, db)
+    return build_analyst_report(decision)
 
 @router.get("/{sample_id}/status")
 async def get_sample_status(sample_id: str, db: AsyncSession = Depends(get_db)):
