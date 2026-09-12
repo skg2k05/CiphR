@@ -19,25 +19,40 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Environments
-.env
-.venv
-env/
+# Virtual Environment
+.venv/
+*/.venv/
 venv/
 ENV/
-env.bak/
-venv.bak/
+env/
 
-# Databases
+# Environment variables & local secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Database
+*.db
+*.sqlite
 *.sqlite3
-test.db
 
-# Project specifics
-uploads/
-backend/test.db
-backend/uploads/
-
-# Pytest
+# Testing & Type Checking
 .pytest_cache/
+*/.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime Uploads (retain folder structure, exclude sample binaries)
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
