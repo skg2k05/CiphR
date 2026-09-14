@@ -104,7 +104,7 @@ def analyze_dex(dex_bytes_generator) -> Dict[str, Any]:
                         if isinstance(string_item, bytes):
                             s = string_item.decode('utf-8', errors='ignore')
                         else:
-                            s = str(string_item)
+                            s = string_item
                     except Exception:
                         continue
 

@@ -120,6 +120,7 @@ def _map_llm(ledger: EvidenceLedger, narrative: str, parent_ids: List[str]):
             semantics="LLM narrative generation was skipped or failed."
         ))
 
+_ember_executor = None
 
 async def build_ledger(
     sample: Sample, 
@@ -134,7 +135,7 @@ async def build_ledger(
     static_ids = _map_static_findings(ledger, findings_data)
     
     # 2. TLSH
-    _map_tlsh(ledger, static_results.get("tlsh"))
+    _map_tlsh(ledger, static_results.get("tlsh") or "")
     
     # 3. Campaign (Derived from static indicators)
     _map_campaign(ledger, campaign_summary, parent_ids=static_ids)
@@ -150,11 +151,12 @@ async def build_ledger(
         # Dedicated bounded executor for EMBER feature extraction and inference
         # This prevents shadow EMBER execution from starving the default asyncio threadpool
         # if multiple concurrent APKs are processed, which is critical since feature extraction takes 1-3 seconds.
-        if not hasattr(build_ledger, "_ember_executor"):
-            build_ledger._ember_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ember_shadow")
+        global _ember_executor
+        if _ember_executor is None:
+            _ember_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ember_shadow")
             
         loop = asyncio.get_running_loop()
-        ember_res = await loop.run_in_executor(build_ledger._ember_executor, classify_apk, str(sample.storage_path))
+        ember_res = await loop.run_in_executor(_ember_executor, classify_apk, str(sample.storage_path))
         
         if ember_res.inference_success:
             # Simple heuristic mapping for shadow mode. 
@@ -164,12 +166,13 @@ async def build_ledger(
             ev_type = EvidenceType.NEUTRAL
             strength = 0.5
             
-            if score >= 0.8:
-                ev_type = EvidenceType.POSITIVE
-                strength = score
-            elif score <= 0.2:
-                ev_type = EvidenceType.NEGATIVE
-                strength = 1.0 - score
+            if score is not None:
+                if score >= 0.8:
+                    ev_type = EvidenceType.POSITIVE
+                    strength = score
+                elif score <= 0.2:
+                    ev_type = EvidenceType.NEGATIVE
+                    strength = 1.0 - score
                 
             ledger.add_evidence(EvidenceItem(
                 source=EvidenceSource.EMBER,

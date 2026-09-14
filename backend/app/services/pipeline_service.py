@@ -176,7 +176,7 @@ async def process_sample_pipeline(sample_id: str):
                         analysis=analysis,
                         static_results=static_results,
                         findings_data=findings_data,
-                        campaign_summary=campaign_summary,
+                        campaign_summary=campaign_summary or "",
                         narrative=narrative
                     )
                 except Exception as shadow_err:
