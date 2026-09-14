@@ -18,14 +18,29 @@ class MockLLMProvider(LLMProvider):
                 narrative += f"- {rf['indicator']} (+{rf['weight']} pts)\n"
             narrative += "\n"
             
-        # Components summary
+        # Components & Permissions summary
+        permissions = analysis_data.get('permissions', [])
         activities = analysis_data.get('activities', [])
         services = analysis_data.get('services', [])
         receivers = analysis_data.get('receivers', [])
-        narrative += f"### Static Components:\n"
+        providers = analysis_data.get('providers', [])
+        narrative += f"### Static Evidence & Components:\n"
+        narrative += f"- Permissions Requested: {len(permissions)}\n"
         narrative += f"- Activities: {len(activities)}\n"
         narrative += f"- Services: {len(services)}\n"
-        narrative += f"- Broadcast Receivers: {len(receivers)}\n\n"
+        narrative += f"- Broadcast Receivers: {len(receivers)}\n"
+        narrative += f"- Content Providers: {len(providers)}\n\n"
+
+        # Campaign & Correlation Intelligence
+        campaign = analysis_data.get('campaign')
+        related_count = analysis_data.get('related_samples_count', 0)
+        if campaign:
+            narrative += f"### Campaign & Cross-Sample Correlation:\n"
+            narrative += f"- Associated Campaign: {campaign.get('name')}\n"
+            narrative += f"- Correlated Samples Count: {related_count}\n"
+            if analysis_data.get('correlation_reason'):
+                narrative += f"- Correlation Evidence: {analysis_data.get('correlation_reason')}\n"
+            narrative += "\n"
         
         if findings:
             narrative += "### Suspicious Indicators (MITRE ATT&CK Mapping):\n"

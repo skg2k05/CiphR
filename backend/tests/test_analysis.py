@@ -3,6 +3,7 @@ from app.services.apk_analysis_service import INDICATOR_RULES
 from app.services.correlation_service import run_correlation
 from app.db.models import Sample, Analysis, Campaign, sample_campaign_links
 from sqlalchemy.future import select
+from sqlalchemy import text
 from tests.conftest import TestingSessionLocal
 
 @pytest.fixture
@@ -14,7 +15,7 @@ def test_indicator_rules():
     assert 'android.permission.BIND_DEVICE_ADMIN' in INDICATOR_RULES
     rule = INDICATOR_RULES['android.permission.BIND_DEVICE_ADMIN']
     assert rule['weight'] == 50
-    assert rule['mitre_technique_id'] == 'T1624'
+    assert rule['mitre_technique_id'] == 'T1626.001'
 
 @pytest.mark.asyncio
 async def test_run_correlation_shared_indicator(db_session):
@@ -25,12 +26,24 @@ async def test_run_correlation_shared_indicator(db_session):
     a1 = Analysis(
         sample=s1,
         status="COMPLETED",
-        risk_factors=[{"indicator": "android.permission.BIND_DEVICE_ADMIN", "weight": 50}]
+        risk_score=50,
+        risk_factors=[{"indicator": "android.permission.BIND_DEVICE_ADMIN", "weight": 50}],
+        dex_data={
+            "domains": [{"indicator": "evil.com"}],
+            "hardcoded_ips": [{"indicator": "8.8.8.8"}],
+            "suspicious_apis": [{"api": "java.lang.Runtime"}]
+        }
     )
     a2 = Analysis(
         sample=s2,
         status="COMPLETED",
-        risk_factors=[{"indicator": "android.permission.BIND_DEVICE_ADMIN", "weight": 50}]
+        risk_score=70,
+        risk_factors=[{"indicator": "android.permission.BIND_DEVICE_ADMIN", "weight": 50}],
+        dex_data={
+            "domains": [{"indicator": "evil.com"}],
+            "hardcoded_ips": [{"indicator": "8.8.8.8"}],
+            "suspicious_apis": [{"api": "java.lang.Runtime"}]
+        }
     )
     
     db_session.add_all([s1, s2, a1, a2])
@@ -40,30 +53,51 @@ async def test_run_correlation_shared_indicator(db_session):
     await run_correlation("s2", db_session)
     
     # Assert
-    # They should be linked via shared_indicator
+    # They should be linked via multi_signal because they share domain, ip, api, and indicator
     result = await db_session.execute(select(sample_campaign_links))
     links = result.all()
     
-    # There should be 2 links (s1 to campaign, s2 to campaign)
     assert len(links) == 2
-    assert links[0].relationship == "shared_indicator"
+    assert links[0].relationship == "multi_signal"
+    # base confidence should be 0.8 (shared domain/ip), and bumped up due to multiple signals
+    assert links[0].confidence > 0.8
+    assert links[0].confidence <= 0.95
+    assert len(links[0].signals) == 4 # shared domain, shared ip, shared api, shared indicator
+    
+    # Check Campaign Intelligence Recalculation
+    campaigns_result = await db_session.execute(select(Campaign))
+    campaign = campaigns_result.scalars().first()
+    
+    assert campaign.risk_score == 70
+    assert campaign.severity in ["HIGH", "CRITICAL", "MEDIUM"] 
+    # High risk is 70, so severity should be HIGH
+    assert campaign.severity == "HIGH"
+    
+    summary = campaign.intelligence_summary
+    assert summary["num_samples"] == 2
+    assert summary["highest_risk"] == 70
+    assert summary["average_risk"] == 60.0
+    
+    common = summary["common_indicators"]
+    assert "evil.com" in common["domains"]
+    assert "8.8.8.8" in common["ips"]
+    assert "java.lang.Runtime" in common["apis"]
     
     # Cleanup for other tests
-    await db_session.delete(s1)
-    await db_session.delete(s2)
-    # The correlation service creates a campaign, we should delete it too
-    campaigns_result = await db_session.execute(select(Campaign))
-    for campaign in campaigns_result.scalars().all():
-        await db_session.delete(campaign)
+    await db_session.execute(text("DELETE FROM sample_campaign_links"))
+    await db_session.execute(text("DELETE FROM findings"))
+    await db_session.execute(text("DELETE FROM analyses"))
+    await db_session.execute(text("DELETE FROM campaigns"))
+    await db_session.execute(text("DELETE FROM samples"))
     await db_session.commit()
 
 def test_extended_indicator_rules():
-    """Verify new high-risk fraud indicators are registered with valid MITRE mappings."""
+    """Verify new high-risk fraud indicators are registered with valid MITRE ATT&CK Mobile mappings."""
     assert 'android.permission.REQUEST_INSTALL_PACKAGES' in INDICATOR_RULES
-    assert INDICATOR_RULES['android.permission.REQUEST_INSTALL_PACKAGES']['mitre_technique_id'] == 'T1475'
+    assert INDICATOR_RULES['android.permission.REQUEST_INSTALL_PACKAGES']['mitre_technique_id'] == 'T1476'
 
     assert 'android.permission.BIND_NOTIFICATION_LISTENER_SERVICE' in INDICATOR_RULES
-    assert INDICATOR_RULES['android.permission.BIND_NOTIFICATION_LISTENER_SERVICE']['mitre_technique_id'] == 'T1636'
+    assert INDICATOR_RULES['android.permission.BIND_NOTIFICATION_LISTENER_SERVICE']['mitre_technique_id'] == 'T1517'
 
     assert 'android.permission.QUERY_ALL_PACKAGES' in INDICATOR_RULES
     assert INDICATOR_RULES['android.permission.QUERY_ALL_PACKAGES']['mitre_technique_id'] == 'T1418'

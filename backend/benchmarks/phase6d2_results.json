@@ -1,0 +1,301 @@
+{
+  "download": {
+    "data_dir": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data",
+    "success": true
+  },
+  "investigation": {
+    "files": [
+      {
+        "filename": "2024-09-22_2024-09-28_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-09-22_2024-09-28_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40764850
+      },
+      {
+        "filename": "2024-09-29_2024-10-05_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-09-29_2024-10-05_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 39245010
+      },
+      {
+        "filename": "2024-10-06_2024-10-12_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-10-06_2024-10-12_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40758602
+      },
+      {
+        "filename": "2024-10-13_2024-10-19_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-10-13_2024-10-19_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40092754
+      },
+      {
+        "filename": "2024-10-20_2024-10-26_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-10-20_2024-10-26_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 39639508
+      },
+      {
+        "filename": "2024-10-27_2024-11-02_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-10-27_2024-11-02_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40372994
+      },
+      {
+        "filename": "2024-11-03_2024-11-09_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-11-03_2024-11-09_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 39642806
+      },
+      {
+        "filename": "2024-11-10_2024-11-16_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-11-10_2024-11-16_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40287632
+      },
+      {
+        "filename": "2024-11-17_2024-11-23_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-11-17_2024-11-23_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40469652
+      },
+      {
+        "filename": "2024-11-24_2024-11-30_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-11-24_2024-11-30_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40433998
+      },
+      {
+        "filename": "2024-12-01_2024-12-07_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-12-01_2024-12-07_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 40305502
+      },
+      {
+        "filename": "2024-12-08_2024-12-14_APK_test.jsonl",
+        "path": "C:\\Users\\Anup Kumar\\Desktop\\projects\\CiphR\\backend\\scratch\\ember2024_benchmark\\apk_test_data\\2024-12-08_2024-12-14_APK_test.jsonl",
+        "lines": 8000,
+        "size_bytes": 41234546
+      }
+    ],
+    "total_samples": 96000,
+    "label_distribution": {
+      "0": 48000,
+      "1": 48000
+    },
+    "file_type_distribution": {
+      "APK": 96000
+    },
+    "unique_sha256": 48000,
+    "unique_families": 524,
+    "top_families": {
+      "spymax": 2942,
+      "wapron": 2094,
+      "boogr": 1870,
+      "hiddad": 1514,
+      "adlo": 1392,
+      "metasploit": 1386,
+      "mobidash": 1290,
+      "fyben": 1030,
+      "spyloan": 960,
+      "fakecalls": 826,
+      "jiagu": 820,
+      "hqwar": 790,
+      "coper": 740,
+      "kuguo": 668,
+      "cerberus": 656,
+      "andreed": 568,
+      "revpn": 506,
+      "badpack": 466,
+      "facestealer": 446,
+      "piom": 420
+    },
+    "schema_keys": [
+      "authenticode",
+      "behavior",
+      "byteentropy",
+      "caps",
+      "datadirectories",
+      "detection_ratio",
+      "exploit",
+      "exports",
+      "family",
+      "family_confidence",
+      "file_property",
+      "file_type",
+      "first_submission_date",
+      "general",
+      "group",
+      "header",
+      "histogram",
+      "imports",
+      "label",
+      "last_analysis_date",
+      "mbc",
+      "md5",
+      "packer",
+      "pefilewarnings",
+      "richheader",
+      "section",
+      "sha1",
+      "sha256",
+      "strings",
+      "tlsh",
+      "ttps",
+      "week_id"
+    ]
+  },
+  "model_validation": {
+    "model_features": 2568,
+    "extractor_dim": 2568,
+    "compatible": true,
+    "total_labeled": 96000,
+    "benign_count": 48000,
+    "malicious_count": 48000,
+    "vectorize_errors": 0,
+    "vectorize_time_s": 14.41,
+    "inference_time_s": 0.5999,
+    "ms_per_sample": 0.0062,
+    "roc_auc": 0.986137,
+    "pr_auc": 0.987086,
+    "benign_scores": {
+      "count": 48000,
+      "min": 8e-06,
+      "max": 0.997205,
+      "mean": 0.081923,
+      "median": 0.012923,
+      "std": 0.169401,
+      "p5": 9.2e-05,
+      "p25": 0.001635,
+      "p75": 0.063311,
+      "p95": 0.479292
+    },
+    "malicious_scores": {
+      "count": 48000,
+      "min": 0.000401,
+      "max": 0.999978,
+      "mean": 0.896626,
+      "median": 0.986046,
+      "std": 0.20592,
+      "p5": 0.357145,
+      "p25": 0.919485,
+      "p75": 0.997616,
+      "p95": 0.999827
+    },
+    "family_analysis": {
+      "spymax": {
+        "count": 2942,
+        "mean": 0.965881,
+        "median": 0.999038,
+        "min": 0.005985,
+        "max": 0.999967
+      },
+      "wapron": {
+        "count": 2094,
+        "mean": 0.996468,
+        "median": 0.999885,
+        "min": 0.312096,
+        "max": 0.999955
+      },
+      "boogr": {
+        "count": 1870,
+        "mean": 0.888264,
+        "median": 0.96607,
+        "min": 0.033097,
+        "max": 0.999853
+      },
+      "hiddad": {
+        "count": 1514,
+        "mean": 0.893954,
+        "median": 0.995202,
+        "min": 0.013164,
+        "max": 0.999581
+      },
+      "adlo": {
+        "count": 1392,
+        "mean": 0.995366,
+        "median": 0.998431,
+        "min": 0.289203,
+        "max": 0.999734
+      },
+      "metasploit": {
+        "count": 1386,
+        "mean": 0.960164,
+        "median": 0.999482,
+        "min": 0.046016,
+        "max": 0.999978
+      },
+      "mobidash": {
+        "count": 1290,
+        "mean": 0.950093,
+        "median": 0.982836,
+        "min": 0.277206,
+        "max": 0.999803
+      },
+      "fyben": {
+        "count": 1030,
+        "mean": 0.797515,
+        "median": 0.897911,
+        "min": 0.019311,
+        "max": 0.999055
+      },
+      "spyloan": {
+        "count": 960,
+        "mean": 0.721652,
+        "median": 0.821731,
+        "min": 0.005859,
+        "max": 0.999107
+      },
+      "fakecalls": {
+        "count": 826,
+        "mean": 0.947572,
+        "median": 0.985263,
+        "min": 0.318042,
+        "max": 0.999296
+      },
+      "jiagu": {
+        "count": 820,
+        "mean": 0.889489,
+        "median": 0.960952,
+        "min": 0.038993,
+        "max": 0.999538
+      },
+      "hqwar": {
+        "count": 790,
+        "mean": 0.922745,
+        "median": 0.981803,
+        "min": 0.020028,
+        "max": 0.999949
+      },
+      "coper": {
+        "count": 740,
+        "mean": 0.952276,
+        "median": 0.979683,
+        "min": 0.24957,
+        "max": 0.999284
+      },
+      "kuguo": {
+        "count": 668,
+        "mean": 0.865634,
+        "median": 0.940453,
+        "min": 0.034183,
+        "max": 0.998187
+      },
+      "cerberus": {
+        "count": 656,
+        "mean": 0.827323,
+        "median": 0.947151,
+        "min": 0.015954,
+        "max": 0.999866
+      }
+    },
+    "ranking": {
+      "highest_benign": 0.997205,
+      "lowest_malicious": 0.000401,
+      "overlap_region": [
+        0.000401,
+        0.997205
+      ]
+    }
+  }
+}

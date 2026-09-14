@@ -55,15 +55,43 @@ async def run_real_audit():
         sample2_id = res2.json()["id"]
         print(f"SAMPLE 2 ID: {sample2_id}")
 
+        # Check Sample 1 Analysis & Findings
+        analysis_res = await client.get(f"/api/v1/samples/{sample_id}/analysis")
+        print("\n--- SAMPLE 1 ANALYSIS ---")
+        print(json.dumps(analysis_res.json(), indent=2))
+        
+        findings_res = await client.get(f"/api/v1/samples/{sample_id}/findings")
+        print("\n--- SAMPLE 1 FINDINGS (MITRE ATT&CK) ---")
+        print(json.dumps(findings_res.json(), indent=2))
+        
         # Check Campaigns
         camp_res = await client.get("/api/v1/campaigns")
         campaigns = camp_res.json()
-        print(f"TOTAL CAMPAIGNS: {campaigns['total']}")
+        print(f"\nTOTAL CAMPAIGNS: {campaigns['total']}")
+        print("CAMPAIGNS LIST:", json.dumps(campaigns, indent=2))
         
         if campaigns['total'] > 0:
             c_id = campaigns['items'][0]['id']
+            
+            # Related samples
+            rel_res = await client.get(f"/api/v1/samples/{sample_id}/related")
+            print("\n--- SAMPLE 1 RELATED SAMPLES ---")
+            print(json.dumps(rel_res.json(), indent=2))
+            
+            # Sample 1 Full Detail
+            detail_res = await client.get(f"/api/v1/samples/{sample_id}")
+            print("\n--- SAMPLE 1 DETAIL WITH CAMPAIGNS & RELATED ---")
+            print(json.dumps(detail_res.json(), indent=2))
+            
+            # Graph
             graph_res = await client.get(f"/api/v1/campaigns/{c_id}/graph")
-            print("GRAPH:", json.dumps(graph_res.json(), indent=2))
+            print("\n--- CAMPAIGN GRAPH (VIS-NETWORK) ---")
+            print(json.dumps(graph_res.json(), indent=2))
+            
+            # Timeline
+            timeline_res = await client.get(f"/api/v1/campaigns/{c_id}/timeline")
+            print("\n--- CAMPAIGN TIMELINE ---")
+            print(json.dumps(timeline_res.json(), indent=2))
             
 if __name__ == "__main__":
     asyncio.run(run_real_audit())
