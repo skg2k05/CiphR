@@ -667,34 +667,3 @@ CiphR was developed collaboratively by a four-member team.
 | **Saloni Kumari**   | [@saloni1225](https://github.com/saloni1225) |
 | **Priyanshi Mohanty**   | [@Priyanshi305](https://github.com/Priyanshi305) |
 | **Anup Kumar Jena**   | [@AKJenaX](https://github.com/AKJenaX) |
-
----
-
-## 📊 Project Status
-
-**Functional MVP / Research & Demonstration Platform**
-
-The `main` branch contains the integrated CiphR platform, including the backend intelligence pipeline, DEX static intelligence, campaign correlation, threat-intelligence capabilities, EMBER evidence integration, LLM narrative infrastructure, and React analyst dashboard.
-
-CiphR is currently suitable for:
-
-* Security research
-* Android malware/fraud analysis
-* APK triage
-* Threat-intelligence demonstrations
-* Campaign correlation experiments
-* Academic projects
-* Security engineering demonstrations
-
----
-
-## 📄 License
-
-Add the project's chosen license here before public distribution.
-
----
-
-## 🔗 Repository
-
-**GitHub:**
-https://github.com/skg2k05/CiphR
